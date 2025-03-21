@@ -5,12 +5,15 @@ import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
 import Button from '@/app/components/Button';
 import dayjs from 'dayjs';
+import useExpenseStore from '@/app/store/expenseStore';
+import ExpenseInfo from '@/app/components/ExpenseInfo';
 
 const BudgetPage = () => {
   const params = useParams();
   const router = useRouter();
   const getTripById = useTripsStore(state => state.getTripById);
   const trip = getTripById(params.id);
+  const expenses = useExpenseStore(state => state.expenses);
   // Todo - deuglify this lol
   if (!trip) {
     return (
@@ -51,6 +54,29 @@ const BudgetPage = () => {
           </div>
         </div>
       </div>
+
+      <div className="mt-6">
+        <h1 className="text-3xl font-bold">Recent Expenses</h1>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {expenses.map(expense => (
+                <ExpenseInfo key={expense.id} expense={expense} />
+              ))}
+          {expenses.length === 0 && (
+                           <p className="text-gray-500 col-span-2 text-center py-8">
+                             No recent expenses
+                           </p>
+                         )}
+      </div>
+      <div className="flex justify-center mt-40">
+        <Button
+          title="Add an Expense"
+          colourClass="green"
+          onClick={() => router.push(`/trips/${params.id}/budget/addExpense`)}
+        />
+      </div>
+
+
     </div>
   );
 };
