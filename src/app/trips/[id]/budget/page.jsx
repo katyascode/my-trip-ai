@@ -14,6 +14,9 @@ const BudgetPage = () => {
   const getTripById = useTripsStore(state => state.getTripById);
   const trip = getTripById(params.id);
   const expenses = useExpenseStore(state => state.expenses);
+  const spent = expenses
+    .filter(expense => expense.trip === trip)
+    .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
   // Todo - deuglify this lol
   if (!trip) {
     return (
@@ -51,6 +54,8 @@ const BudgetPage = () => {
           <div>
             <h2 className="text-2xl font-semibold text-gray-800">Total Budget</h2>
             <p className="text-3xl font-bold text-pink-600">${trip.budget}</p>
+            <h2 className="text-2xl font-semibold text-gray-800">Total Spent</h2>
+            <p className="text-3xl font-bold text-pink-600">${spent}</p>
           </div>
         </div>
       </div>

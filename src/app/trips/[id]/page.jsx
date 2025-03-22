@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
+import useExpenseStore from '@/app/store/expenseStore';
 import Button from '@/app/components/Button';
 import dayjs from 'dayjs';
 
@@ -11,6 +12,10 @@ const TripDetails = () => {
   const router = useRouter();
   const getTripById = useTripsStore(state => state.getTripById);
   const trip = getTripById(params.id);
+  const expenses = useExpenseStore(state => state.expenses);
+  const spent = expenses
+      .filter(expense => expense.trip === trip)
+      .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
 
   if (!trip) {
     return (
@@ -35,7 +40,7 @@ const TripDetails = () => {
           {dayjs(trip.departureDate).format('MMM D, YYYY')}
           {!trip.isOneWay && ` - ${dayjs(trip.returnDate).format('MMM D, YYYY')}`}
           <span>•</span>
-          <div>TODO / ${trip.budget} spent</div>
+          <div>${spent} / ${trip.budget} spent</div>
         </div>
         <div className="flex flex-row gap-2 text-sm">
           <button className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5">
