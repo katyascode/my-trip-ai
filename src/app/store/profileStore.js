@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const useExpenseStore = create(
+const useProfileStore = create(
   persist(
     (set, get) => ({
       profiles: [],
@@ -20,4 +20,4 @@ const useExpenseStore = create(
   )
 );
 
-export default useExpenseStore;
+export default useProfileStore;
