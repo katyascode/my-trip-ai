@@ -7,6 +7,8 @@ import Button from '@/app/components/Button';
 import dayjs from 'dayjs';
 import useExpenseStore from '@/app/store/expenseStore';
 import ExpenseInfo from '@/app/components/ExpenseInfo';
+import styles from "./pieChartStyles.module.css"
+import PieChart from '@/app/components/pieChart';
 
 const BudgetPage = () => {
   const params = useParams();
@@ -33,6 +35,9 @@ const BudgetPage = () => {
     );
   }
 
+  //TODO: change to categories and to trip.store (prob need to add categories dynamically) need to test more
+  const pieData = useExpenseStore.getState().getExpenseData();
+
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -56,9 +61,16 @@ const BudgetPage = () => {
             <p className="text-3xl font-bold text-pink-600">${trip.budget}</p>
             <h2 className="text-2xl font-semibold text-gray-800">Total Spent</h2>
             <p className="text-3xl font-bold text-pink-600">${spent}</p>
+
+            {/*pie chart visual*/}
+            <div className={styles.pieChartWrapper}>
+              <div className={styles.pieChartPie}>
+                <PieChart data={pieData} />
+              </div>
+            </div>
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="mt-6">
         <h1 className="text-3xl font-bold">Recent Expenses</h1>

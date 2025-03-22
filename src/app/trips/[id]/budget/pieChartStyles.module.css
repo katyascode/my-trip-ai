@@ -1,0 +1,131 @@
+@keyframes bake-pie {
+  from {
+    transform: rotate(0deg) translate3d(0,0,0);
+  }
+}
+
+/* Pie Chart Wrapper */
+.pieChartWrapper {
+  /* width: 400px;
+  margin: 30px auto;
+  text-align: center;
+  border-style: solid; */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+  padding-left: 20%;
+}
+
+/* Pie Chart Layout */
+.pieChartPie, .pieChartLegend {
+  display: inline-block;
+  vertical-align: top;
+}
+
+/* Pie Chart Design */
+.pieChartPie {
+  position: relative;
+  height: 200px;
+  width: 200px;
+  margin: 10px auto 35px;
+}
+
+.pieChartPie::before {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 1;
+  width: 100px;
+  height: 100px;
+  background: #EEE;
+  border-radius: 50%;
+  top: 50px;
+  left: 50px;
+}
+
+.pieChartPie::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 2px;
+  border-radius: 50%;
+  margin: 220px auto;
+}
+
+/* Pie Chart Slices */
+.slice {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  clip: rect(0px, 200px, 200px, 100px);
+  animation: bake-pie 1s;
+}
+
+.slice span {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: black;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  clip: rect(0px, 200px, 200px, 100px);
+}
+
+/* Pie Chart Legend */
+.pieChartLegend {
+  /* display: block;
+  list-style-type: none;
+  margin: 0 auto;
+  background: #FFF;
+  padding: 0.5em 0.75em;
+  font-size: 13px;
+  box-shadow: 1px 1px 0 #DDD, 2px 2px 0 #BBB;
+  text-align: left;
+  width: 65%;
+  bottom: 0; */
+
+  display: flex;
+  list-style-type: none;
+  margin: 0 auto;
+  background: #FFF;
+  padding: 0.5em;
+  font-size: 13px;
+  box-shadow: 1px 1px 0 #DDD, 2px 2px 0 #BBB;
+  text-align: left;
+  width: 50%; /* Make it full width */
+  position: absolute; /* Position it absolutely */
+  bottom: 0; /* Align to bottom */
+  left: 90px; /* Start from left edge */
+  clear: both; /* Clear any floats */
+}
+
+.pieChartLegend li {
+  height: 1.25em;
+  margin-bottom: 0.7em;
+  padding-left: 0.5em;
+  border-left: 1.25em solid black;
+}
+
+.pieChartLegend em {
+  font-style: normal;
+}
+
+.pieChartLegend span {
+  float: right;
+}
+
+/* Responsive Design */
+.pieCharts {
+  display: flex;
+  flex-direction: row;
+}
+
+@media (max-width: 500px) {
+  .pieCharts {
+    flex-direction: column;
+  }
+}
