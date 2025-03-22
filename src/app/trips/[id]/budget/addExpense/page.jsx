@@ -22,7 +22,7 @@ const CreateExpense = () => {
     date: '',
     amount: '',
     currency: '',
-    tripId: params.id
+    tripId: params.id //NOTE changed to this from trip: tripId
   });
 
 
