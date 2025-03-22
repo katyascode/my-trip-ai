@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, {useMemo} from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
 import Button from '@/app/components/Button';
@@ -16,8 +16,15 @@ const BudgetPage = () => {
   const getTripById = useTripsStore(state => state.getTripById);
   const trip = getTripById(params.id);
   const expenses = useExpenseStore(state => state.expenses);
+  const getExpenseData = useExpenseStore(state => state.getExpenseData);
+
+  // Memoize the pie data calculation
+  const pieData = useMemo(() => {
+    return getExpenseData(params.id);
+  }, [getExpenseData, params.id, expenses]);
+
   const spent = expenses
-    .filter(expense => expense.trip === trip)
+    .filter(expense => expense.tripId === params.id)
     .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
   // Todo - deuglify this lol
   if (!trip) {
@@ -34,9 +41,6 @@ const BudgetPage = () => {
       </div>
     );
   }
-
-  //TODO: change to categories and to trip.store (prob need to add categories dynamically) need to test more
-  const pieData = useExpenseStore.getState().getExpenseData();
 
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
@@ -77,13 +81,13 @@ const BudgetPage = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {expenses
-          .filter(expense => expense.trip === trip) // Filter expenses by tripId
+          .filter(expense => expense.tripId === params.id)
           .map(expense => (
             <ExpenseInfo key={expense.id} expense={expense} />
           ))
         }
 
-        {expenses.filter(expense => expense.trip === trip).length === 0 && (
+        {expenses.filter(expense => expense.tripId === params.id).length === 0 && (
           <p className="text-gray-500 col-span-2 text-center py-8">
             No recent expenses
           </p>
