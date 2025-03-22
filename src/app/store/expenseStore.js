@@ -20,7 +20,7 @@ const useExpenseStore = create(
       //getting id method
       getExpenseById: (id) => get().expenses.find(expense => expense.id === id),
 
-      //getting category info 
+      //getting category info for pie chart
       getExpenseData: (tripId) => {
         const expenses = get().expenses.filter(expense => expense.tripId === tripId);
         // group expenses by title and sum their amounts
@@ -37,7 +37,7 @@ const useExpenseStore = create(
           value
         }));
         
-        console.log('Generated pie data:', pieData); // Debug log
+        console.log('Generated pie data:', pieData); // debug
         return pieData;
       }
     }),

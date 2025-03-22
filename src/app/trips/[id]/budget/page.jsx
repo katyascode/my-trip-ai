@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useMemo} from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
 import Button from '@/app/components/Button';
@@ -14,19 +14,45 @@ const BudgetPage = () => {
   const params = useParams();
   const router = useRouter();
   const getTripById = useTripsStore(state => state.getTripById);
-  const trip = getTripById(params.id);
   const expenses = useExpenseStore(state => state.expenses);
   const getExpenseData = useExpenseStore(state => state.getExpenseData);
+  
+  // Add state to handle client-side rendering
+  const [mounted, setMounted] = useState(false);
+  const [trip, setTrip] = useState(null);
+
+  useEffect(() => {
+    setMounted(true);
+    if (params.id) {
+      setTrip(getTripById(params.id));
+    }
+  }, [params.id, getTripById]);
 
   // Memoize the pie data calculation
   const pieData = useMemo(() => {
+    if (!mounted || !params.id) return [];
     return getExpenseData(params.id);
-  }, [getExpenseData, params.id, expenses]);
+  }, [getExpenseData, params.id, expenses, mounted]);
 
-  const spent = expenses
-    .filter(expense => expense.tripId === params.id)
-    .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
-  // Todo - deuglify this lol
+  const spent = useMemo(() => {
+    if (!mounted || !params.id) return 0;
+    return expenses
+      .filter(expense => expense.tripId === params.id)
+      .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
+  }, [expenses, params.id, mounted]);
+
+  // Show loading state while mounting
+  if (!mounted) {
+    return (
+      <div className="max-w-[800px] mx-auto px-6 py-8">
+        <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600 text-center">
+          <h1 className="text-2xl font-bold text-pink-800 mb-4">Loading...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  // Show not found state
   if (!trip) {
     return (
       <div className="max-w-[800px] mx-auto px-6 py-8">
@@ -59,22 +85,26 @@ const BudgetPage = () => {
       </div>
 
       <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600">
-        <div className="flex justify-between items-center mb-8">
-          <div>
+        <div className="flex flex-col items-center mb-8">
+          <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-800">Total Budget</h2>
             <p className="text-3xl font-bold text-pink-600">${trip.budget}</p>
             <h2 className="text-2xl font-semibold text-gray-800">Total Spent</h2>
             <p className="text-3xl font-bold text-pink-600">${spent}</p>
+          </div>
 
-            {/*pie chart visual*/}
+          {/*pie chart visual*/}
+          {pieData.length > 0 ? (
             <div className={styles.pieChartWrapper}>
               <div className={styles.pieChartPie}>
                 <PieChart data={pieData} />
               </div>
             </div>
-            </div>
-          </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">Add an expenses to display</p>
+          )}
         </div>
+      </div>
 
       <div className="mt-6">
         <h1 className="text-3xl font-bold">Recent Expenses</h1>
