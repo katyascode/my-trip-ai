@@ -6,12 +6,15 @@ import InputField from "@/app/components/InputField";
 import Button from "@/app/components/Button";
 import {FaUpload} from "react-icons/fa6";
 import useExpenseStore from '@/app/store/expenseStore';
+import useTripsStore from '@/app/store/tripsStore';
 
 // Todo - Form Validation -> End date cannot be before start date
 // Todo - Upload documents mockup
 const CreateExpense = () => {
   const router = useRouter();
   const params = useParams();
+  const getTripById = useTripsStore(state => state.getTripById);
+  const tripId = getTripById(params.id);
   const addExpense = useExpenseStore(state => state.addExpense);
   const [expenseData, setExpenseData] = useState({
     title: '',
@@ -19,7 +22,9 @@ const CreateExpense = () => {
     date: '',
     amount: '',
     currency: '',
+    trip:tripId
   });
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +43,8 @@ const CreateExpense = () => {
     const valid = expenseData.title &&
            expenseData.date &&
            expenseData.amount &&
-           expenseData.currency;
+           expenseData.currency &&
+           expenseData.trip;
     console.log('Form valid:', valid, expenseData);
     return valid;
   };

@@ -59,14 +59,18 @@ const BudgetPage = () => {
         <h1 className="text-3xl font-bold">Recent Expenses</h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {expenses.map(expense => (
-                <ExpenseInfo key={expense.id} expense={expense} />
-              ))}
-          {expenses.length === 0 && (
-                           <p className="text-gray-500 col-span-2 text-center py-8">
-                             No recent expenses
-                           </p>
-                         )}
+        {expenses
+          .filter(expense => expense.trip === trip) // Filter expenses by tripId
+          .map(expense => (
+            <ExpenseInfo key={expense.id} expense={expense} />
+          ))
+        }
+
+        {expenses.filter(expense => expense.trip === trip).length === 0 && (
+          <p className="text-gray-500 col-span-2 text-center py-8">
+            No recent expenses
+          </p>
+        )}
       </div>
       <div className="flex justify-center mt-40">
         <Button
