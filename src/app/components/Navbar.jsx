@@ -20,6 +20,12 @@ const Navbar = () => {
           >
             Trips
           </Link>
+          <Link
+             className="text-lg text-pink-600"
+             href="/trips/profile"
+          >
+             Profile
+          </Link>
         </div>
       </div>
     </div>
