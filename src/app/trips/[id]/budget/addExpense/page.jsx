@@ -22,7 +22,7 @@ const CreateExpense = () => {
     date: '',
     amount: '',
     currency: '',
-    trip:tripId
+    tripId: params.id //NOTE changed to this from trip: tripId
   });
 
 
@@ -44,7 +44,7 @@ const CreateExpense = () => {
            expenseData.date &&
            expenseData.amount &&
            expenseData.currency &&
-           expenseData.trip;
+           expenseData.tripId;
     console.log('Form valid:', valid, expenseData);
     return valid;
   };

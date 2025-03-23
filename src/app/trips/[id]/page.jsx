@@ -14,7 +14,7 @@ const TripDetails = () => {
   const trip = getTripById(params.id);
   const expenses = useExpenseStore(state => state.expenses);
   const spent = expenses
-      .filter(expense => expense.trip === trip)
+      .filter(expense => expense.tripId === params.id)
       .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
   const [aiResponse, setAiResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
