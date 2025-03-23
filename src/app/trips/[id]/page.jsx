@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
+import useExpenseStore from '@/app/store/expenseStore';
 import Button from '@/app/components/Button';
 import dayjs from 'dayjs';
 
@@ -11,6 +12,10 @@ const TripDetails = () => {
   const router = useRouter();
   const getTripById = useTripsStore(state => state.getTripById);
   const trip = getTripById(params.id);
+  const expenses = useExpenseStore(state => state.expenses);
+  const spent = expenses
+      .filter(expense => expense.trip === trip)
+      .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
   const [aiResponse, setAiResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,7 +37,6 @@ const TripDetails = () => {
             type: 'trip',
             userMessage: `Tell me about ${trip.destination}`,
             destinationCity: trip.destination,
-            // You can add these if you have them:
             // age: trip.age,
             // preferences: trip.preferences,
             // originAirport: trip.originAirport,
@@ -42,7 +46,7 @@ const TripDetails = () => {
 
         const data = await response.json();
         if (data.error) {
-          return new Error(data.error);
+          throw new Error(data.error);
         }
         setAiResponse(data.reply);
       } catch (err) {
@@ -57,7 +61,7 @@ const TripDetails = () => {
 
   return (
     <div className="flex flex-col">
-      {!trip ? (
+    {!trip ? (
         <div className="max-w-[800px] mx-auto px-6 py-8">
           <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600 text-center">
             <h1 className="text-2xl font-bold text-pink-800 mb-4">Trip not found</h1>
@@ -76,7 +80,7 @@ const TripDetails = () => {
               {dayjs(trip.departureDate).format('MMM D, YYYY')}
               {!trip.isOneWay && ` - ${dayjs(trip.returnDate).format('MMM D, YYYY')}`}
               <span>•</span>
-              <div>TODO / ${trip.budget} spent</div>
+              <div>${spent} / ${trip.budget} spent</div>
             </div>
             <div className="flex flex-row gap-2 text-sm">
               <button className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5">
