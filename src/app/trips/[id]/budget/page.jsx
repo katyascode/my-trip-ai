@@ -41,6 +41,11 @@ const BudgetPage = () => {
       .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
   }, [expenses, params.id, mounted]);
 
+  const budgetLeft = useMemo(() => {
+    return trip?.budget ? trip.budget - spent : 0;
+  }, [trip, spent]);
+  
+
   // Show loading state while mounting
   if (!mounted) {
     return (
@@ -87,10 +92,23 @@ const BudgetPage = () => {
       <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600">
         <div className="flex flex-col items-center mb-8">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Total Budget</h2>
-            <p className="text-3xl font-bold text-pink-600">${trip.budget}</p>
-            <h2 className="text-2xl font-semibold text-gray-800">Total Spent</h2>
-            <p className="text-3xl font-bold text-pink-600">${spent}</p>
+            {/* Total Budget & Budget Left side-by-side */}
+            <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-800">Total Budget</h2>
+                <p className="text-3xl font-bold text-pink-600">${trip.budget}</p>
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-800">Budget Left</h2>
+                <p className="text-3xl font-bold text-green-400">${budgetLeft.toFixed(2)}</p>
+              </div>
+            </div>
+
+            {/* Total Spent below */}
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800">Total Spent</h2>
+              <p className="text-3xl font-bold text-pink-600">${spent.toFixed(2)}</p>
+            </div>
           </div>
 
           {/*pie chart visual*/}

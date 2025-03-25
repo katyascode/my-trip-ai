@@ -17,18 +17,34 @@ const useExpenseStore = create(
         return id;
       },
 
+      //delete an expense
+      deleteExpense: (id) => {
+        set((state) => ({
+          expenses: state.expenses.filter((expense) => expense.id !== id),
+        }));
+      },
+
+      //update an expense
+      updateExpense: (id, updatedData) => {
+        set((state) => ({
+          expenses: state.expenses.map(expense =>
+            expense.id === id ? { ...expense, ...updatedData } : expense
+          ),
+        }));
+      },
+
       //getting id method
       getExpenseById: (id) => get().expenses.find(expense => expense.id === id),
 
       //getting category info for pie chart
       getExpenseData: (tripId) => {
         const expenses = get().expenses.filter(expense => expense.tripId === tripId);
-        // group expenses by title and sum their amounts
+        // group expenses by category and sum their amounts
         const categoryTotals = {};
         expenses.forEach(expense => {
-          const title = expense.title || 'Uncategorized';
+          const category = expense.category || 'Uncategorized';
           const amount = parseFloat(expense.amount || 0);
-          categoryTotals[title] = (categoryTotals[title] || 0) + amount;
+          categoryTotals[category] = (categoryTotals[category] || 0) + amount;
         });
 
         // convert to pie data format

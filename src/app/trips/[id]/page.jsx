@@ -80,7 +80,7 @@ const TripDetails = () => {
               {dayjs(trip.departureDate).format('MMM D, YYYY')}
               {!trip.isOneWay && ` - ${dayjs(trip.returnDate).format('MMM D, YYYY')}`}
               <span>•</span>
-              <div>${spent} / ${trip.budget} spent</div>
+              <div>${spent.toFixed(2)} / ${trip.budget} spent</div>
             </div>
             <div className="flex flex-row gap-2 text-sm">
               <button className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5">
