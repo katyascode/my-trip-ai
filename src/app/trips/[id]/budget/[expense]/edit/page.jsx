@@ -1,58 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import InputField from "@/app/components/InputField";
 import Button from "@/app/components/Button";
-import {FaUpload} from "react-icons/fa6";
 import useExpenseStore from '@/app/store/expenseStore';
-import useTripsStore from '@/app/store/tripsStore';
 
-// Todo - Form Validation -> End date cannot be before start date
-// Todo - Upload documents mockup
-const CreateExpense = () => {
+const EditExpense = () => {
   const router = useRouter();
   const params = useParams();
-  const getTripById = useTripsStore(state => state.getTripById);
-  const tripId = getTripById(params.id);
-  const addExpense = useExpenseStore(state => state.addExpense);
+  const getExpenseById = useExpenseStore(state => state.getExpenseById);
+  const updateExpense = useExpenseStore(state => state.updateExpense);
+
+  const expense = getExpenseById(params.expense);
   const [expenseData, setExpenseData] = useState({
     title: '',
     category: '',
     date: '',
     amount: '',
     currency: '',
-    tripId: params.id //NOTE changed to this from trip: tripId
+    tripId: params.id
   });
 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('Submitting expense data:', expenseData);
-
-    try {
-      const newExpenseId = addExpense(expenseData);
-      console.log('Created expense with ID:', newExpenseId);
-      await router.push(`/trips/${params.id}/budget`);
-    } catch (error) {
-      console.error('Error creating expense:', error);
+  useEffect(() => {
+    if (expense) {
+      setExpenseData({
+        title: expense.title || '',
+        category: expense.category || '',
+        date: expense.date || '',
+        amount: expense.amount || '',
+        currency: expense.currency || '',
+        tripId: expense.tripId || params.id
+      });
     }
+  }, [expense, params.id]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    updateExpense(params.expense, expenseData);
+    router.push(`/trips/${params.id}/budget`);
   };
 
   const isFormValid = () => {
-    const valid = expenseData.title &&
-           expenseData.date &&
-           expenseData.amount &&
-           expenseData.currency &&
-           expenseData.tripId;
-    console.log('Form valid:', valid, expenseData);
-    return valid;
+    return (
+      expenseData.title &&
+      expenseData.date &&
+      expenseData.amount &&
+      expenseData.currency &&
+      expenseData.tripId
+    );
   };
+
+  if (!expense) {
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl text-gray-600">Expense not found.</h2>
+        <Button
+          title="Back to Budget"
+          colourClass="green"
+          onClick={() => router.push(`/trips/${params.id}/budget`)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[600px] mx-auto p-5 bg-white rounded-xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Create a new expense</h1>
+        <h1 className="text-2xl font-bold">Edit expense</h1>
         <button
           className="text-2xl text-pink-600 hover:text-gray-600"
           onClick={() => router.back()}
@@ -62,18 +77,13 @@ const CreateExpense = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <InputField
-            type="text"
-            value={expenseData.title}
-            label="Title:"
-            onChange={(e) => {
-              console.log('Title change:', e.target.value);
-              setExpenseData({...expenseData, title: e.target.value});
-            }}
-            placeholder="Enter your expense title"
-          />
-        </div>
+        <InputField
+          type="text"
+          value={expenseData.title}
+          label="Title:"
+          onChange={(e) => setExpenseData({ ...expenseData, title: e.target.value })}
+          placeholder="Enter your expense title"
+        />
 
         <div className="space-y-2">
             <InputField
@@ -87,7 +97,7 @@ const CreateExpense = () => {
                 placeholder="Enter a short description"
             />
         </div>
-        
+
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-black">Category:</label>
           <div className="relative w-full">
@@ -121,44 +131,35 @@ const CreateExpense = () => {
           </div>
           </div>
 
-          <div className="flex flex-row justify-between gap-4">
-            <InputField
-              type="date"
-              label="Date of expense"
-              value={expenseData.date}
-              onChange={(e) => setExpenseData({...expenseData, date: e.target.value})}
-            />
-          </div>
+        <InputField
+          type="date"
+          label="Date of expense"
+          value={expenseData.date}
+          onChange={(e) => setExpenseData({ ...expenseData, date: e.target.value })}
+        />
 
-        <div className="space-y-2">
-          <InputField
-            label="Amount:"
-            type="number"
-            placeholder="$ Amount"
-            value={expenseData.amount}
-            onChange={(e) => setExpenseData({...expenseData, amount: e.target.value})}
-          />
-        </div>
+        <InputField
+          label="Amount:"
+          type="number"
+          placeholder="$ Amount"
+          value={expenseData.amount}
+          onChange={(e) => setExpenseData({ ...expenseData, amount: e.target.value })}
+        />
 
-        <div className="space-y-2">
-            <InputField
-               type="text"
-               value={expenseData.currency}
-               label="Currency:"
-               onChange={(e) => {
-                   console.log('Currency change:', e.target.value);
-                   setExpenseData({...expenseData, currency: e.target.value});
-               }}
-                    placeholder="Currency "
-                  />
-        </div>
+        <InputField
+          type="text"
+          value={expenseData.currency}
+          label="Currency:"
+          onChange={(e) => setExpenseData({ ...expenseData, currency: e.target.value })}
+          placeholder="Currency"
+        />
 
         <div className="flex justify-center pt-6 mt-10">
           <Button
             type="submit"
-            title="Create my expense!"
+            title="Save Changes"
             fontWeight="font-semibold"
-            colourClass="pinkStrong"
+            colourClass="green"
             isDisabled={!isFormValid()}
           />
         </div>
@@ -167,4 +168,4 @@ const CreateExpense = () => {
   );
 };
 
-export default CreateExpense;
+export default EditExpense;

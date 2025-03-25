@@ -13,6 +13,12 @@ const useTripsStore = create(
         return id;
       },
       getTripById: (id) => get().trips.find(trip => trip.id === id),
+
+      deleteTrip: (id) => {
+        set((state) => ({
+          trips: state.trips.filter(trip => trip.id !== id)
+        }));
+      },
     }),
     {
       name: 'trips-storage',
