@@ -11,7 +11,11 @@ function Home() {
   const trips = useTripsStore(state => state.trips);
   const latestTrip = trips[trips.length - 1];
   const profiles = useProfileStore(state => state.profiles);
-  const latestProfile = profiles[profiles.length - 1];
+  let latestProfileUsername = "User!";
+
+  if (profiles.length > 0) {
+    latestProfileUsername = profiles[profiles.length - 1].username;
+  }
 
 
   return (
@@ -20,7 +24,7 @@ function Home() {
       <div className="flex flex-row justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-4xl font-semibold text-pink-800">Welcome,</h1>
-          <h1 className="text-4xl font-semibold text-pink-800">{latestProfile.username}</h1>
+          <h1 className="text-4xl font-semibold text-pink-800">{latestProfileUsername}</h1>
         </div>
         <div className="flex flex-col bg-green-200 text-lg text-green-400 rounded-xl justify-between p-4">
           <div className="flex flex-row gap-2 items-center">
