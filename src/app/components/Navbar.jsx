@@ -22,6 +22,12 @@ const Navbar = () => {
           </Link>
           <Link
              className="text-lg text-pink-600"
+             href="/trips/upload"
+             >
+             Upload
+          </Link>
+          <Link
+             className="text-lg text-pink-600"
              href="/trips/profile"
           >
              Profile
