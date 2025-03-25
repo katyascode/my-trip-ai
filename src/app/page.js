@@ -5,10 +5,14 @@ import TripCard from "@/app/components/TripCard";
 import Button from "@/app/components/Button";
 import {FaCloudSun, FaLocationPin, FaMapLocation, FaMapLocationDot, FaPlaneUp} from "react-icons/fa6";
 import useTripsStore from "@/app/store/tripsStore";
+import useProfileStore from "@/app/store/profileStore";
 
 function Home() {
   const trips = useTripsStore(state => state.trips);
   const latestTrip = trips[trips.length - 1];
+  const profiles = useProfileStore(state => state.profiles);
+  const latestProfile = profiles[profiles.length - 1];
+
 
   return (
     <div className="mx-auto px-6 py-8 flex flex-col space-y-8">
@@ -16,7 +20,7 @@ function Home() {
       <div className="flex flex-row justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-4xl font-semibold text-pink-800">Welcome,</h1>
-          <h1 className="text-5xl font-semibold text-pink-800">Team 5</h1>
+          <h1 className="text-4xl font-semibold text-pink-800">{latestProfile.username}</h1>
         </div>
         <div className="flex flex-col bg-green-200 text-lg text-green-400 rounded-xl justify-between p-4">
           <div className="flex flex-row gap-2 items-center">

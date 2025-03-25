@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
 import useExpenseStore from '@/app/store/expenseStore';
+import useProfileStore from '@/app/store/profileStore';
 import Button from '@/app/components/Button';
 import dayjs from 'dayjs';
 
@@ -19,6 +20,9 @@ const TripDetails = () => {
   const [aiResponse, setAiResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const profiles = useProfileStore(state => state.profiles);
+  const latestProfile = profiles[profiles.length - 1];
+
 
   useEffect(() => {
     const fetchAiSuggestions = async () => {
@@ -38,9 +42,10 @@ const TripDetails = () => {
             userMessage: `Tell me about ${trip.destination}`,
             destinationCity: trip.destination,
             // age: trip.age,
-            // preferences: trip.preferences,
+            preferences: latestProfile.interests,
             // originAirport: trip.originAirport,
             // destinationAirport: trip.destinationAirport
+            budget: latestProfile.budget
           })
         });
 

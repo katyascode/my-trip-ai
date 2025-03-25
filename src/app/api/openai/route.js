@@ -16,6 +16,7 @@ export async function POST(req) {
       destinationAirport,
       destinationCity,
       preferences,
+      budget,
       documentContent // e.g. hotel confirmation text or flight booking info
     } = body;
 
@@ -44,6 +45,7 @@ export async function POST(req) {
       - Destination city: ${destinationCity || "unknown"}
       - Destination airport: ${destinationAirport || "unknown"}
       - Preferences: ${preferences || "none"}
+      - Budget: ${budget || "none"}
       
       Be concise but informative and exciting.
     `.trim()
