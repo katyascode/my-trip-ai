@@ -6,11 +6,13 @@ import useProfileStore from '@/app/store/profileStore';
 import Button from '@/app/components/Button';
 import { FaPlaneUp } from 'react-icons/fa6';
 import { useParams, useRouter } from 'next/navigation';
+import ProfileInfo from '@/app/components/ProfileInfo';
 
 const Profile = () => {
     const params = useParams();
     const router = useRouter();
-  const profiles = useProfileStore(state => state.profiles);
+    const profiles = useProfileStore(state => state.profiles);
+    const lastProfile = profiles.length > 0 ? profiles[profiles.length - 1] : null;
 
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
@@ -33,7 +35,19 @@ const Profile = () => {
             </div>
           </>
         )}
-      </div>
+        {lastProfile && (
+            <>
+            <ProfileInfo key={lastProfile.id} profile={lastProfile} />
+            <div className="flex justify-center mt-40">
+                <Button
+                   title="Edit Profile"
+                   colourClass="green"
+                   onClick={() => router.push(`/trips/profile/register`)}
+                />
+            </div>
+            </>
+            )}
+        </div>
     </div>
   );
 }
