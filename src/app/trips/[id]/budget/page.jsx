@@ -124,8 +124,13 @@ const BudgetPage = () => {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Recent Expenses</h1>
+        <Button
+          title="Add Expense"
+          colourClass="green"
+          onClick={() => router.push(`/trips/${params.id}/budget/addExpense`)}
+        />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {expenses
@@ -141,15 +146,6 @@ const BudgetPage = () => {
           </p>
         )}
       </div>
-      <div className="flex justify-center mt-40">
-        <Button
-          title="Add an Expense"
-          colourClass="green"
-          onClick={() => router.push(`/trips/${params.id}/budget/addExpense`)}
-        />
-      </div>
-
-
     </div>
   );
 };

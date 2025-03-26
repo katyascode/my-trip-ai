@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
 import useExpenseStore from '@/app/store/expenseStore';
 import useProfileStore from '@/app/store/profileStore';
 import Button from '@/app/components/Button';
 import dayjs from 'dayjs';
+import useUploadStore from '@/app/store/uploadStore';
+import UploadPopUp from "@/app/components/UploadPopUp";
+import DocumentViewerPopUp from "@/app/components/DocumentViewerPopUp";
+
 
 const TripDetails = () => {
   const params = useParams();
@@ -23,6 +27,36 @@ const TripDetails = () => {
   const profiles = useProfileStore(state => state.profiles);
   const latestProfile = profiles[profiles.length - 1];
 
+  const fileInputRef = useRef();
+  const uploadedFiles = useUploadStore(state => state.uploadedFiles);
+  const addFile = useUploadStore(state => state.addFile);
+  const deleteFile = useUploadStore(state => state.deleteFile);
+  const [showViewerPopUp, setShowViewerPopUp] = useState(false);
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewURL, setPreviewURL] = useState('');
+  const [showUploadPopUp, setShowUploadPopUp] = useState(false);
+  
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file || !trip) return;
+  
+    setSelectedFile(file);
+    setPreviewURL(URL.createObjectURL(file));
+    setShowUploadPopUp(true);
+  };
+
+  const handleUpload = (fileData) => {
+    addFile({
+      ...fileData,
+      trip: trip.destination,
+      tripId: trip.id,
+    });
+  
+    setSelectedFile(null);
+    setPreviewURL('');
+    setShowUploadPopUp(false);
+  };
 
   useEffect(() => {
     const fetchAiSuggestions = async () => {
@@ -79,6 +113,25 @@ const TripDetails = () => {
         </div>
       ) : (
         <>
+          <DocumentViewerPopUp
+            isOpen={showViewerPopUp}
+            onClose={() => setShowViewerPopUp(false)}
+            files={uploadedFiles}
+            tripId={params.id}
+            deleteFile={deleteFile}
+          />
+          <UploadPopUp
+            isOpen={showUploadPopUp}
+            onClose={() => {
+              setShowUploadPopUp(false);
+              setSelectedFile(null);
+              setPreviewURL('');
+            }}
+            onUpload={handleUpload}
+            selectedFile={selectedFile}
+            previewURL={previewURL}
+          />
+
           <div className="px-6 py-8 flex flex-col space-y-1">
             <h1 className="text-4xl font-semibold">{trip.destination}</h1>
             <div className="flex flex-row gap-2 text-sm">
@@ -87,18 +140,40 @@ const TripDetails = () => {
               <span>•</span>
               <div>${spent.toFixed(2)} / ${trip.budget} spent</div>
             </div>
-            <div className="flex flex-row gap-2 text-sm">
-              <button className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5">
-                + Add documents to trip
-              </button>
+
+            <div className="flex flex-row justify-between items-center text-sm mt-2">
+              <div className="flex gap-2">
+                <button
+                  className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5"
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  + Add documents to trip
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                <button
+                  className="bg-green-200 text-green-400 rounded-lg px-2 py-1.5"
+                  onClick={() => router.push(`/trips/${params.id}/budget`)}
+                >
+                  $ View budget
+                </button>
+              </div>
+
               <button
-                className="bg-green-200 text-green-400 rounded-lg px-2 py-1.5"
-                onClick={() => router.push(`/trips/${params.id}/budget`)}
+                onClick={() => setShowViewerPopUp(true)}
+                className="bg-orange-100 text-orange-400 rounded-lg px-2 py-1.5"
+                title="View uploaded documents"
               >
-                $ View budget
+                📁 Docs
               </button>
             </div>
           </div>
+
           <div className="relative">
             <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl"/>
             <div className="px-6 py-4">
