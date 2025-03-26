@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import useUploadStore from "@/app/store/uploadStore";
 import useTripsStore from "@/app/store/tripsStore";
+import * as pdfjs from "pdfjs-dist";
+import "pdfjs-dist/build/pdf.worker.entry";
 
 const UploadPage = () => {
     const trips = useTripsStore(state => state.trips);
@@ -14,6 +16,7 @@ const UploadPage = () => {
     const addFile = useUploadStore((state) => state.addFile);
     const deleteFile = useUploadStore((state) => state.deleteFile);
     const uploadedFiles = useUploadStore((state) => state.uploadedFiles);
+    const pdfjs=required("pdfjs-dist/es5/build/pdf");
 
     // Handle File Selection
     const handleFileChange = (event) => {
@@ -41,6 +44,7 @@ const UploadPage = () => {
         // Add file to Zustand store with trip association
         addFile({
             name: selectedFile.name,
+            text: getItems(URL.createObjectURL(selectedFile)),
             url: URL.createObjectURL(selectedFile),
             trip: trips.find(t => t.id === selectedTrip)?.destination || "Unknown",
             tripId: selectedTrip,
@@ -51,6 +55,16 @@ const UploadPage = () => {
         setPreviewURL("");
         setSelectedTrip("");
     };
+    async function getContent(src){
+        const doc=await pdfjs.getDocument(src).promise
+        const page=await doc.getPage(1)
+        return await page.getTextContent()
+    }
+
+    async function getItems(src){
+        const content = await getContent(src);
+        return content.items.map((item) => item.str).join(" ");
+    }
 
     return (
         <div className="max-w-[800px] mx-auto px-6 py-8">
