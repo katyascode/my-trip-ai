@@ -42,7 +42,8 @@ const UploadPage = () => {
         addFile({
             name: selectedFile.name,
             url: URL.createObjectURL(selectedFile),
-            trip: selectedTrip
+            trip: trips.find(t => t.id === selectedTrip)?.destination || "Unknown",
+            tripId: selectedTrip,
         });
 
         // Reset form
@@ -68,7 +69,7 @@ const UploadPage = () => {
                         >
                             <option value="">Select Trip</option>
                             {trips.map((trip) => (
-                                <option key={trip.id} value={trip.destination}>
+                                <option key={trip.id} value={trip.id}>
                                     {trip.destination}
                                 </option>
                             ))}
@@ -93,10 +94,14 @@ const UploadPage = () => {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="bg-pink-600 text-white font-bold px-4 py-2 rounded-md hover:bg-pink-700"
+                        disabled={!selectedTrip || !selectedFile}
+                        className={`bg-pink-600 text-white font-bold px-4 py-2 rounded-md ${
+                            !selectedTrip || !selectedFile ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-700'
+                        }`}
                     >
                         Upload File
                     </button>
+
                 </form>
 
                 {/* Uploaded Files List */}
@@ -104,12 +109,20 @@ const UploadPage = () => {
                 <ul>
                     {uploadedFiles && uploadedFiles.map((file) => (
                         <li key={file.id} className="flex justify-between items-center mt-2">
-                            <span>{file.name} ({file.trip})</span>
+                            <a
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline hover:text-blue-800"
+                            >
+                            {file.name} ({file.trip})
+                            </a>
+
                             <button
                                 onClick={() => deleteFile(file.id)}
-                                className="text-red-500 hover:text-red-700"
+                                className="text-pink-600 hover:text-red-600 ml-2"
                             >
-                                ❌ Delete
+                                ✕ Remove File
                             </button>
                         </li>
                     ))}

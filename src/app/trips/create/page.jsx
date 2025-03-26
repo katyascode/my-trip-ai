@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import InputField from "@/app/components/InputField";
 import Button from "@/app/components/Button";
 import {FaUpload} from "react-icons/fa6";
 import useTripsStore from '@/app/store/tripsStore';
+import useUploadStore from '@/app/store/uploadStore';
 
-// Todo - Form Validation -> End date cannot be before start date
-// Todo - Upload documents mockup
+// (Checklist) Todo - Form Validation -> End date cannot be before start date
+// (Checklist) Todo - Upload documents mockup -> Allow user to upload documents
 const CreateTrip = () => {
   const router = useRouter();
   const addTrip = useTripsStore(state => state.addTrip);
@@ -20,13 +21,86 @@ const CreateTrip = () => {
     budget: '',
   });
 
+  const [dateError, setDateError] = useState('');
+  const [budgetError, setBudgetError] = useState('');
+  const [destinationError, setDestinationError] = useState('');
+
+  const fileInputRef = useRef();
+  const [pendingUploads, setPendingUploads] = useState([]);
+  const addFileToStore = useUploadStore(state => state.addFile);
+
+  const handleUpload = (file) => {
+    const uploadWithTrip = {
+      ...file,
+      trip: tripData.destination || "New Trip",
+      tripId: null, // will be assigned after trip is created
+    };
+  
+    setPendingUploads(prev => [...prev, uploadWithTrip]);
+    addFileToStore(uploadWithTrip);
+  
+    setSelectedFile(null);
+    setPreviewURL('');
+    setShowUploadPopUp(false);
+  };  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const { departureDate, returnDate, isOneWay, budget, destination } = tripData;
+
+    let valid = true;
+    setDestinationError('');
+    setDateError('');
+    setBudgetError('');
+
+    if (!destination) {
+      setDestinationError('Destination is required.');
+      valid = false;
+    }
+    
+    if (!departureDate && !isOneWay && !returnDate) {
+      setDateError('Both departure and return dates are required.');
+      valid = false;
+    } else if (!departureDate && returnDate) {
+      setDateError('Departure date is required.');
+      valid = false;
+    } else if (departureDate && !isOneWay && !returnDate) {
+      setDateError('Return date is required for round trips.');
+      valid = false;
+    } else if (
+      !isOneWay &&
+      departureDate &&
+      returnDate &&
+      new Date(returnDate) < new Date(departureDate)
+    ) {
+      setDateError('Return date cannot be earlier than departure date.');
+      valid = false;
+    }
+    
+    if (!budget) {
+      setBudgetError('Budget is required.');
+      valid = false;
+    } else if (isNaN(parseFloat(budget)) || parseFloat(budget) < 0) {
+      setBudgetError('Budget must be a non-negative number.');
+      valid = false;
+    }
+
+    if (!valid) return;
+
     console.log('Submitting trip data:', tripData);
 
     try {
       const newTripId = addTrip(tripData);
       console.log('Created trip with ID:', newTripId);
+
+      pendingUploads.forEach(file => {
+        addFileToStore({
+          ...file,
+          tripId: newTripId,
+        });
+      });
+      
       await router.push(`/trips/${newTripId}`);
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -34,12 +108,21 @@ const CreateTrip = () => {
   };
 
   const isFormValid = () => {
-    const valid = tripData.destination &&
-           tripData.departureDate &&
-           (tripData.isOneWay || tripData.returnDate) &&
-           tripData.budget;
-    console.log('Form valid:', valid, tripData);
-    return valid;
+    const { destination, departureDate, returnDate, isOneWay, budget } = tripData;
+
+    if (!destination || !departureDate || (!isOneWay && !returnDate) || !budget) {
+      return false;
+    }
+
+    if (!isOneWay && new Date(returnDate) < new Date(departureDate)) {
+      return false;
+    }
+
+    if (isNaN(parseFloat(budget)) || parseFloat(budget) < 0) {
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -67,6 +150,9 @@ const CreateTrip = () => {
             placeholder="Enter your destination"
           />
         </div>
+        {destinationError && (
+          <p className="text-red-500 text-sm">{destinationError}</p>
+        )}
 
         <div className="space-y-3">
           <div className="flex flex-row items-center gap-2">
@@ -94,6 +180,9 @@ const CreateTrip = () => {
               />
             )}
           </div>
+          {dateError && (
+            <p className="text-red-500 text-sm mt-1">{dateError}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -105,6 +194,9 @@ const CreateTrip = () => {
             onChange={(e) => setTripData({...tripData, budget: e.target.value})}
           />
         </div>
+        {budgetError && (
+          <p className="text-red-500 text-sm">{budgetError}</p>
+        )}
 
         <div className="flex flex-col space-y-2">
           <label className="font-semibold">Upload documents</label>
@@ -113,15 +205,70 @@ const CreateTrip = () => {
             and we'll take care of the rest by providing intelligent suggestions based on your bookings.
           </p>
           <div className="mt-2 flex justify-center">
-            <Button
-              title="Upload Documents..."
-              colourClass="green"
-              textSize="text-reg"
-              icon={<FaUpload />}
-              iconSide="left"
-              customClassName="w-full"
-            />
+          <Button
+            title="Upload Documents..."
+            colourClass="green"
+            textSize="text-reg"
+            icon={<FaUpload />}
+            iconSide="left"
+            customClassName="w-full"
+            onClick={() => fileInputRef.current.click()}
+          />
           </div>
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const fileData = {
+                  name: file.name,
+                  url: URL.createObjectURL(file),
+                  trip: tripData.destination || "New Trip",
+                  tripId: null,
+                };
+                setPendingUploads(prev => [...prev, fileData]);
+                addFileToStore(fileData);
+              }
+            }}            
+          />
+          {pendingUploads.length > 0 && (
+            <div className="mt-4">
+              <ul className="space-y-2">
+                {pendingUploads.map((file, index) => (
+                  <li
+                    key={index}
+                    className="flex justify-between items-center bg-pink-50 rounded px-3 py-2"
+                  >
+                    <a
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline break-all"
+                    >
+                      {file.name}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault(); // prevents form submission
+                        const confirmed = window.confirm(`Are you sure you want to remove "${file.name}"?`);
+                        if (confirmed) {
+                          setPendingUploads(pendingUploads.filter((_, i) => i !== index));
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 ml-4 text-sm"
+                    >
+                      ✕ Remove File
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-center pt-6 mt-10">
@@ -130,7 +277,6 @@ const CreateTrip = () => {
             title="Create my trip!"
             fontWeight="font-semibold"
             colourClass="pinkStrong"
-            isDisabled={!isFormValid()}
           />
         </div>
       </form>
