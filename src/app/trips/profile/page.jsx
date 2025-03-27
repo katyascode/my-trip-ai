@@ -42,7 +42,7 @@ const Profile = () => {
                 <Button
                    title="Edit Profile"
                    colourClass="green"
-                   onClick={() => router.push(`/trips/profile/register`)}
+                   onClick={() => router.push(`/trips/profile/register?username=${lastProfile.username}`)}
                 />
             </div>
             </>

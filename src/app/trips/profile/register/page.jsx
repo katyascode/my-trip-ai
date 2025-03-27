@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useTripsStore from '@/app/store/tripsStore';
 import useProfileStore from '@/app/store/profileStore';
 import InputField from "@/app/components/InputField";
 import Button from '@/app/components/Button';
 import { FaPlaneUp } from 'react-icons/fa6';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 const Register = () => {
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const getProfileById = useProfileStore(state => state.getProfileById);
     const profileId = getProfileById(params.id);
     const addProfile = useProfileStore(state => state.addProfile);
@@ -20,6 +21,14 @@ const Register = () => {
         budget: '',
         interests: ''
     });
+    //if a pre-existing username already exists, just autofill it in form 
+    useEffect(()=>{
+      const username = searchParams.get('username');
+      if (username){
+        setProfileData(prev =>({...prev,username}));
+      }
+    }, [searchParams]);
+
 const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Submitting profile data:', profileData);
