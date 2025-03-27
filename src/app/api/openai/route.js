@@ -15,9 +15,9 @@ export async function POST(req) {
       originAirport,
       destinationAirport,
       destinationCity,
+      files,
       preferences,
-      budget,
-      documentContent // e.g. hotel confirmation text or flight booking info
+      budget
     } = body;
 
     if (!(userMessage && type)) {
@@ -50,6 +50,22 @@ export async function POST(req) {
       Be concise but informative and exciting.
     `.trim()
     }
+    if (type === "itinerary") {
+          systemMessage = `
+          You are a helpful, engaging and modern AI travel assistant.
+          Your job is to provide a high-level itinerary of the trip, based on given information from the text extracted from uploaded files and your suggestions for additional activities and modes of transport. Your answer should be organized clearly laid out by time and date and note which travel activities are based off recommendations.
+          Maximum words: Around 100-500 words.
+          Personalize your suggestions for the destination city, using this user preferences, their fileText and their age group keeping in mind their budget:
+
+          - Age: ${age || "unknown"}
+          - Destination city: ${destinationCity || "unknown"}
+          - Files: ($filesText || "none")
+          - Preferences: ${preferences || "none"}
+          - Budget: ${budget || "none"}
+
+          Be concise but informative and exciting.
+        `.trim()
+        }
 
     const res = await openai.chat.completions.create({
       model: "gpt-4o-mini",

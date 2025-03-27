@@ -140,7 +140,6 @@ const TripDetails = () => {
               <span>•</span>
               <div>${spent.toFixed(2)} / ${trip.budget} spent</div>
             </div>
-
             <div className="flex flex-row justify-between items-center text-sm mt-2">
               <div className="flex gap-2">
                 <button
@@ -172,7 +171,18 @@ const TripDetails = () => {
                 📁 Docs
               </button>
             </div>
-          </div>
+
+            {/* Centered Generate Itinerary Button */}
+            <div className="flex justify-center mt-4">
+              <button
+                className="bg-pink-500 text-white font-bold rounded-lg px-4 py-3 w-full max-w-md text-lg shadow-md hover:bg-pink-600 transition"
+                onClick={() => router.push(`/trips/${params.id}/itinerary`)}
+              >
+                ✨ Generate Itinerary
+              </button>
+            </div>
+
+
 
           <div className="relative">
             <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl"/>
