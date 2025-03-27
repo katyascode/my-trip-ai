@@ -1,79 +1,98 @@
-"use client";
+'use client';
 
 import React, { useState } from "react";
 import useUploadStore from "@/app/store/uploadStore";
 import useTripsStore from "@/app/store/tripsStore";
-import * as pdfjs from "pdfjs-dist";
-import "pdfjs-dist/build/pdf.worker.entry";
+import mammoth from "mammoth";
 
 const UploadPage = () => {
     const trips = useTripsStore(state => state.trips);
-
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewURL, setPreviewURL] = useState("");
-    const [selectedTrip, setSelectedTrip] = useState("");  // State for selected trip
+    const [selectedTrip, setSelectedTrip] = useState("");
 
-    const addFile = useUploadStore((state) => state.addFile);
-    const deleteFile = useUploadStore((state) => state.deleteFile);
-    const uploadedFiles = useUploadStore((state) => state.uploadedFiles);
-    const pdfjs=required("pdfjs-dist/es5/build/pdf");
+    const addFile = useUploadStore(state => state.addFile);
+    const deleteFile = useUploadStore(state => state.deleteFile);
+    const uploadedFiles = useUploadStore(state => state.uploadedFiles);
 
-    // Handle File Selection
     const handleFileChange = (event) => {
         const file = event.target.files[0];
+        console.log("File selected:", file);
+
         if (file) {
             setSelectedFile(file);
             setPreviewURL(URL.createObjectURL(file));
         }
     };
 
-    // Handle Form Submission
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        console.log("Submit clicked");
 
         if (!selectedTrip) {
             alert("Please select a trip before uploading.");
+            console.error("No trip selected");
             return;
         }
 
         if (!selectedFile) {
             alert("Please select a file to upload.");
+            console.error("No file selected");
             return;
         }
 
-        // Add file to Zustand store with trip association
-        addFile({
+        console.log("Uploading file:", selectedFile.name, "for trip:", selectedTrip);
+
+        let text = "";
+        if (selectedFile.type === "application/pdf") {
+            console.log("Processing PDF file...");
+            text = await getItems(URL.createObjectURL(selectedFile));
+            console.log("Extracted text from PDF:", text);
+        } else if (selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            console.log("Processing DOCX file...");
+            text = await extractTextFromDocx(selectedFile);
+            console.log("Extracted text from DOCX:", text);
+        }
+
+        const newFile = {
             name: selectedFile.name,
-            text: getItems(URL.createObjectURL(selectedFile)),
+            text: text,
             url: URL.createObjectURL(selectedFile),
             trip: trips.find(t => t.id === selectedTrip)?.destination || "Unknown",
             tripId: selectedTrip,
-        });
+        };
 
-        // Reset form
+        console.log("Adding file to store:", newFile);
+        addFile(newFile);
+
         setSelectedFile(null);
         setPreviewURL("");
         setSelectedTrip("");
     };
-    async function getContent(src){
-        const doc=await pdfjs.getDocument(src).promise
-        const page=await doc.getPage(1)
-        return await page.getTextContent()
-    }
 
-    async function getItems(src){
-        const content = await getContent(src);
-        return content.items.map((item) => item.str).join(" ");
-    }
+    const extractTextFromDocx = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const arrayBuffer = event.target.result;
+                mammoth.extractRawText({ arrayBuffer })
+                    .then((result) => {
+                        resolve(result.value);
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    };
 
     return (
         <div className="max-w-[800px] mx-auto px-6 py-8">
             <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600 text-center">
                 <h2 className="text-2xl font-bold text-pink-800 mb-4">Upload File</h2>
 
-                {/* Upload Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Trip Selection */}
                     <div className="space-y-2 mt-4">
                         <label className="block font-medium">What trip is this document for?</label>
                         <select
@@ -90,14 +109,12 @@ const UploadPage = () => {
                         </select>
                     </div>
 
-                    {/* File Input */}
                     <input
                         type="file"
                         onChange={handleFileChange}
                         className="bg-green-200 text-green-400 rounded-lg px-2 py-1.5"
                     />
 
-                    {/* Preview Section */}
                     {previewURL && (
                         <div className="mt-4">
                             <p className="text-lg font-semibold">File Preview:</p>
@@ -105,7 +122,6 @@ const UploadPage = () => {
                         </div>
                     )}
 
-                    {/* Submit Button */}
                     <button
                         type="submit"
                         disabled={!selectedTrip || !selectedFile}
@@ -115,25 +131,25 @@ const UploadPage = () => {
                     >
                         Upload File
                     </button>
-
                 </form>
 
-                {/* Uploaded Files List */}
                 <h3 className="text-xl font-bold mt-6">Uploaded Files:</h3>
                 <ul>
                     {uploadedFiles && uploadedFiles.map((file) => (
                         <li key={file.id} className="flex justify-between items-center mt-2">
                             <a
-                            href={file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline hover:text-blue-800"
+                                href={file.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline hover:text-blue-800"
                             >
-                            {file.name} ({file.trip})
+                                {file.name} ({file.trip})
                             </a>
-
                             <button
-                                onClick={() => deleteFile(file.id)}
+                                onClick={() => {
+                                    console.log("Deleting file:", file.id);
+                                    deleteFile(file.id);
+                                }}
                                 className="text-pink-600 hover:text-red-600 ml-2"
                             >
                                 ✕ Remove File
