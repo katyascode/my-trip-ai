@@ -11,7 +11,6 @@ import useUploadStore from '@/app/store/uploadStore';
 import UploadPopUp from "@/app/components/UploadPopUp";
 import DocumentViewerPopUp from "@/app/components/DocumentViewerPopUp";
 
-
 const TripDetails = () => {
   const params = useParams();
   const router = useRouter();
@@ -19,8 +18,9 @@ const TripDetails = () => {
   const trip = getTripById(params.id);
   const expenses = useExpenseStore(state => state.expenses);
   const spent = expenses
-      .filter(expense => expense.tripId === params.id)
-      .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
+    .filter(expense => expense.tripId === params.id)
+    .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
+  
   const [aiResponse, setAiResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,7 +32,6 @@ const TripDetails = () => {
   const addFile = useUploadStore(state => state.addFile);
   const deleteFile = useUploadStore(state => state.deleteFile);
   const [showViewerPopUp, setShowViewerPopUp] = useState(false);
-
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState('');
   const [showUploadPopUp, setShowUploadPopUp] = useState(false);
@@ -52,7 +51,7 @@ const TripDetails = () => {
       trip: trip.destination,
       tripId: trip.id,
     });
-  
+
     setSelectedFile(null);
     setPreviewURL('');
     setShowUploadPopUp(false);
@@ -75,11 +74,8 @@ const TripDetails = () => {
             type: 'trip',
             userMessage: `Tell me about ${trip.destination}`,
             destinationCity: trip.destination,
-            // age: trip.age,
-            preferences: latestProfile.interests,
-            // originAirport: trip.originAirport,
-            // destinationAirport: trip.destinationAirport
-            budget: latestProfile.budget
+            preferences: latestProfile?.interests || [],
+            budget: latestProfile?.budget || 0
           })
         });
 
@@ -100,7 +96,7 @@ const TripDetails = () => {
 
   return (
     <div className="flex flex-col">
-    {!trip ? (
+      {!trip ? (
         <div className="max-w-[800px] mx-auto px-6 py-8">
           <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600 text-center">
             <h1 className="text-2xl font-bold text-pink-800 mb-4">Trip not found</h1>
@@ -172,7 +168,6 @@ const TripDetails = () => {
               </button>
             </div>
 
-            {/* Centered Generate Itinerary Button */}
             <div className="flex justify-center mt-4">
               <button
                 className="bg-pink-500 text-white font-bold rounded-lg px-4 py-3 w-full max-w-md text-lg shadow-md hover:bg-pink-600 transition"
@@ -182,19 +177,18 @@ const TripDetails = () => {
               </button>
             </div>
 
-
-
-          <div className="relative">
-            <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl"/>
-            <div className="px-6 py-4">
-              {isLoading && <div className="text-gray-600">Loading suggestions...</div>}
-              {error && <div className="text-red-600">Error: {error}</div>}
-              {aiResponse && (
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-pink-200">
-                  <h2 className="text-xl font-semibold text-pink-800 mb-2">Travel Tips</h2>
-                  <p className="text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
-                </div>
-              )}
+            <div className="relative">
+              <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl" />
+              <div className="px-6 py-4">
+                {isLoading && <div className="text-gray-600">Loading suggestions...</div>}
+                {error && <div className="text-red-600">Error: {error}</div>}
+                {aiResponse && (
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-pink-200">
+                    <h2 className="text-xl font-semibold text-pink-800 mb-2">Travel Tips</h2>
+                    <p className="text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>

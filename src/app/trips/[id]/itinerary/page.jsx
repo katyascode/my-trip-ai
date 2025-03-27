@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import useTripsStore from '@/app/store/tripsStore';
 import Button from '@/app/components/Button';
@@ -19,48 +19,45 @@ const ItineraryPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const profiles = useProfileStore(state => state.profiles);
-  const latestProfile = profiles[profiles.length - 1];
+  const latestProfile = profiles.length > 0 ? profiles[profiles.length - 1] : null;
 
+  useEffect(() => {
+    const fetchAiSuggestions = async () => {
+      if (!trip || !latestProfile) return;
 
-    useEffect(() => {
-        const fetchAiSuggestions = async () => {
-          if (!trip) return;
+      setIsLoading(true);
+      setError(null);
 
-          setIsLoading(true);
-          setError(null);
+      try {
+        const response = await fetch('/api/openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'itinerary',
+            userMessage: `Generate an itinerary for ${trip.destination}`,
+            destinationCity: trip.destination,
+            files: filesText,
+            preferences: latestProfile.interests,
+            budget: latestProfile.budget
+          })
+        });
 
-          try {
-            const response = await fetch('/api/openai', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                type: 'itinerary',
-                userMessage: `Generate an itinerary for ${trip.destination}`,
-                destinationCity: trip.destination,
-                files: filesText,
-                preferences: latestProfile.interests,
-                budget: latestProfile.budget
-              })
-            });
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        setAiResponse(data.reply);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-            const data = await response.json();
-            if (data.error) {
-              throw new Error(data.error);
-            }
-            setAiResponse(data.reply);
-          } catch (err) {
-            setError(err.message);
-          } finally {
-            setIsLoading(false);
-          }
-        };
-
-        fetchAiSuggestions();
-      }, [trip]);
-
-
+    fetchAiSuggestions();
+  }, [trip, latestProfile]);
 
   // Show not found state
   if (!trip) {
@@ -93,23 +90,21 @@ const ItineraryPage = () => {
           onClick={() => router.back()}
         />
       </div>
-    </div>
-    <div className="relative">
-        <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl"/>
-            <div className="px-6 py-4">
-                {isLoading && <div className="text-gray-600">Loading itinerary...</div>}
-                {error && <div className="text-red-600">Error: {error}</div>}
-                 {aiResponse && (
-                    <div className="bg-white rounded-lg p-4 shadow-sm border border-pink-200">
-                      <h2 className="text-xl font-semibold text-pink-800 mb-2">Trip Suggestions</h2>
-                      <p className="text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
 
+      <div className="relative">
+        <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl" />
+        <div className="px-6 py-4">
+          {isLoading && <div className="text-gray-600">Loading itinerary...</div>}
+          {error && <div className="text-red-600">Error: {error}</div>}
+          {aiResponse && (
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-pink-200">
+              <h2 className="text-xl font-semibold text-pink-800 mb-2">Trip Suggestions</h2>
+              <p className="text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
