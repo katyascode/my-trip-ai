@@ -1,37 +1,113 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useTripsStore from '@/app/store/tripsStore';
 import useProfileStore from '@/app/store/profileStore';
 import InputField from "@/app/components/InputField";
 import Button from '@/app/components/Button';
 import { FaPlaneUp } from 'react-icons/fa6';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 const Register = () => {
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const getProfileById = useProfileStore(state => state.getProfileById);
-    const profileId = getProfileById(params.id);
+    const updateProfile = useProfileStore(state => state.updateProfile);
     const addProfile = useProfileStore(state => state.addProfile);
-    const interestOptions=['Hiking','Beaches','Shopping','Exploring Food','Museums','Sightseeing','Relaxation/Spas','Adventure Activities']
-      const [profileData, setProfileData] = useState({
+    const profiles = useProfileStore(state => state.profiles);
+    const profileId = getProfileById(params.id);
+    const defaultInterests=['Hiking','Beaches','Shopping','Exploring Food','Museums','Sightseeing','Relaxation/Spas','Adventure Activities']
+    const [interestOptions, setInterestOptions] = useState(defaultInterests);      const [profileData, setProfileData] = useState({
         username: '',
         budget: '',
-        interests: ''
+        interests: []
     });
+
+     //to dynamically allow users to add additional interests
+     const [newInterest, setNewInterest] = useState('');
+     const [showAddedInterest, setShowAddedInterest] = useState(false);
+ 
+     //check if we're editing or creating a new user profile
+    const [isEditMode, setIsEditMode] = useState(false);
+
+    
+    //if a pre-existing username already exists, just autofill it in form 
+    useEffect(()=>{
+      const username = searchParams.get('username');
+      if (username){
+        setIsEditMode(true);
+        //load up the existing profile
+        const existingProfile = profiles.find(p => p.username === username);
+        if (existingProfile){
+          const interestsArray = existingProfile.interests ? existingProfile.interests.split(', ') :[];
+
+          //add interests only if not in list yet
+          const updatedInterestOptions = [...interestOptions];
+          interestsArray.forEach(interest =>{
+            if (!updatedInterestOptions.includes(interest)){
+              updatedInterestOptions.push(interest);
+            }
+          });
+          setInterestOptions(updatedInterestOptions);
+
+          setProfileData({
+            username: existingProfile.username,
+            budget: existingProfile.budget,
+            interests: interestsArray
+          });
+        }
+      }
+    }, [searchParams, profiles]);
+   
+    //logic for interacting with interest buttons
+    const toggleInterest = (interest) =>{
+      setProfileData(prev => {
+        const currentInterests = prev.interests;
+        const newInterests = currentInterests.includes(interest)
+          ? currentInterests.filter(i => i !== interest)
+          :[...currentInterests, interest];
+        return {...prev, interests:newInterests};
+      });
+    };
+
+    const handleAddedNewInterest = (e) =>{
+      e.preventDefault();
+      if (newInterest.trim()){
+        const trimmedInterest = newInterest.trim();
+        if (!interestOptions.includes(trimmedInterest)){
+          setInterestOptions(prev => [...prev, trimmedInterest]);
+        }
+        setNewInterest('');
+        setShowAddedInterest(false);
+      }
+    };
+
 const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Submitting profile data:', profileData);
-
-    try {
-      const newProfileId = addProfile(profileData);
-      console.log('Created profile with ID:', profileId);
-      await router.push(`/trips/profile`);
-    } catch (error) {
-      console.error('Error creating profile:', error);
-    }
-  };
+      try {
+        if (isEditMode){
+          const existingProfile = profiles.find(p =>p.username === profileData.username);
+          if (existingProfile){
+            updateProfile(existingProfile.id, {
+              ...profileData,
+              interests: profileData.interests.join(', ')
+            });
+          }
+        }
+        else{
+          addProfile({
+            ...profileData,
+            interests: profileData.interests.join(', ')
+          });
+        }
+          console.log('Created profile with ID:', profileId);
+          await router.push(`/trips/profile`);
+      } catch (error) {
+          console.error('Error saving profile:', error);
+      }
+    };
 
   const isFormValid = () => {
     const valid = profileData.username && profileData.budget && profileData.interests;
@@ -43,7 +119,9 @@ const handleSubmit = async (e) => {
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold text-pink-800">Register New Profile</h1>
+        <h1 className="text-3xl font-semibold text-pink-800">
+          {isEditMode ? 'Edit Profile' : 'Register New Profile'}
+        </h1>
         <button
              className="text-2xl text-pink-600 hover:text-gray-600"
               onClick={() => router.back()}
@@ -78,22 +156,55 @@ const handleSubmit = async (e) => {
                         <option value="$$$">$$$ - Luxury</option>
                       </select>
              </div>
-             <div className="space-y-2">
-                 <InputField
-                    type="text"
-                    value={profileData.interests}
-                    label="What are your traveling interests?"
-                    onChange={(e) => {
-                        console.log('interests change:', e.target.value);
-                        setProfileData({...profileData, interests: e.target.value});
-                    }}
-                    placeholder="Enter your interests comma separated"
-                 />
-             </div>
+             <div className="space-y-2 mt-4">
+                <div className='flex justify-between items-center'>
+                <label className='block font-medium'>What are your traveling interests?</label>
+                  <button
+                    type="button"
+                    onClick={()=> setShowAddedInterest(!showAddedInterest)}
+                    className='text-sm text-pink-600 hover:text-pink-700 font-medium'
+                  >
+                    + Add More
+                  </button>
+                </div>
+                {showAddedInterest && (
+                  <div className='flex gap-2 mb-2'>
+                    <input
+                      type='text'
+                      value={newInterest}
+                      onChange={(e) => setNewInterest(e.target.value)}
+                      placeholder='Enter another interest'
+                      className='flex-1 border px-3 py-2 rounded-mb text-sm'
+                    />
+                    <button
+                      type='button'
+                      onClick={handleAddedNewInterest}
+                      className='px-3 py-2 bg-pink-600 text-white rounded-md text-sm hover:bg-pink-700'
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-2 mt-2'>
+                  {interestOptions.map((interest)=>(
+                    <button 
+                      key={interest}
+                      type='button'
+                      onClick={()=>toggleInterest(interest)}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                        ${profileData.interests.includes(interest)
+                          ? 'bg-pink-600 text-white hover:bg-pink-700'
+                          : 'bg-pink-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                      {interest}
+                    </button>
+                  ))}
+                </div>
+                </div>
              <div className="flex justify-center pt-6 mt-10">
                  <Button
                     type="submit"
-                    title="Register my profile!"
+                    title={isEditMode ? "Update Profile!" : "Register my profile!"}
                      fontWeight="font-semibold"
                      colourClass="pinkStrong"
                      isDisabled={!isFormValid()}
@@ -105,5 +216,4 @@ const handleSubmit = async (e) => {
       </div>
   );
 }
-
 export default Register;
