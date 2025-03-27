@@ -6,12 +6,23 @@ const useUploadStore = create(
     (set, get) => ({
       uploadedFiles: [],
 
-      addFile: (file) => {
+      addFile: (fileData) => {
         const id = Math.random().toString(36).substr(2, 9); // Unique ID
-        set((state) => ({
-          uploadedFiles: [...state.uploadedFiles, { ...file, id }]
-        }));
-        return id;
+        const reader = new FileReader();
+        reader.readAsDataURL(fileData.file);
+        reader.onloadend = ()=>{
+          set((state) => ({
+            uploadedFiles: [...state.uploadedFiles, { 
+              id,
+              name: fileData.name,
+              trip: fileData.trip,
+              tripId: fileData.tripId,
+              data: reader.result 
+            }]
+          }));
+        }
+      
+        // return id;
       },
 
       getFileById: (id) => get().uploadedFiles.find(file => file.id === id),
