@@ -12,7 +12,15 @@ const Profile = () => {
     const params = useParams();
     const router = useRouter();
     const profiles = useProfileStore(state => state.profiles);
+    const deleteProfile = useProfileStore(state => state.deleteProfile); //for testing purposes
     const lastProfile = profiles.length > 0 ? profiles[profiles.length - 1] : null;
+
+    const handleDeleteProfile=()=>{
+      if (lastProfile){
+        deleteProfile(lastProfile.id);
+        router.push('/trips/profile');
+      }
+    };
 
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
@@ -38,13 +46,18 @@ const Profile = () => {
         {lastProfile && (
             <>
             <ProfileInfo key={lastProfile.id} profile={lastProfile} />
-            <div className="flex justify-center mt-40">
+            <div className="flex flex-col justify-center items-center gap-4 mt-40">
                 <Button
                    title="Edit Profile"
                    colourClass="green"
                    onClick={() => router.push(`/trips/profile/register?username=${lastProfile.username}`)}
                 />
-            </div>
+                <Button
+                  title="Delete profile"
+                  colourClass="red"
+                  onClick={handleDeleteProfile}
+                />
+              </div>
             </>
             )}
         </div>

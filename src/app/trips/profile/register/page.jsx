@@ -13,8 +13,10 @@ const Register = () => {
     const params = useParams();
     const searchParams = useSearchParams();
     const getProfileById = useProfileStore(state => state.getProfileById);
-    const profileId = getProfileById(params.id);
+    const updateProfile = useProfileStore(state => state.updateProfile);
     const addProfile = useProfileStore(state => state.addProfile);
+    const profiles = useProfileStore(state => state.profiles);
+    const profileId = getProfileById(params.id);
     const defaultInterests=['Hiking','Beaches','Shopping','Exploring Food','Museums','Sightseeing','Relaxation/Spas','Adventure Activities']
     const [interestOptions, setInterestOptions] = useState(defaultInterests);
     const [profileData, setProfileData] = useState({
@@ -26,13 +28,36 @@ const Register = () => {
     const [newInterest, setNewInterest] = useState('');
     const [showAddedInterest, setShowAddedInterest] = useState(false);
 
+    //check if we're editing or creating a new user profile
+    const [isEditMode, setIsEditMode] = useState(false);
+
     //if a pre-existing username already exists, just autofill it in form 
     useEffect(()=>{
       const username = searchParams.get('username');
       if (username){
-        setProfileData(prev =>({...prev,username}));
+        setIsEditMode(true);
+        //load up the existing profile
+        const existingProfile = profiles.find(p => p.username === username);
+        if (existingProfile){
+          const interestsArray = existingProfile.interests ? existingProfile.interests.split(', ') :[];
+
+          //add interests only if not in list yet
+          const updatedInterestOptions = [...interestOptions];
+          interestsArray.forEach(interest =>{
+            if (!updatedInterestOptions.includes(interest)){
+              updatedInterestOptions.push(interest);
+            }
+          });
+          setInterestOptions(updatedInterestOptions);
+
+          setProfileData({
+            username: existingProfile.username,
+            budget: existingProfile.budget,
+            interests: interestsArray
+          });
+        }
       }
-    }, [searchParams]);
+    }, [searchParams, profiles]);
    
     //logic for interacting with interest buttons
     const toggleInterest = (interest) =>{
@@ -61,14 +86,25 @@ const Register = () => {
       e.preventDefault();
       console.log('Submitting profile data:', profileData);
       try {
-          const newProfileId = addProfile({
+        if (isEditMode){
+          const existingProfile = profiles.find(p =>p.username === profileData.username);
+          if (existingProfile){
+            updateProfile(existingProfile.id, {
               ...profileData,
               interests: profileData.interests.join(', ')
+            });
+          }
+        }
+        else{
+          addProfile({
+            ...profileData,
+            interests: profileData.interests.join(', ')
           });
+        }
           console.log('Created profile with ID:', profileId);
           await router.push(`/trips/profile`);
       } catch (error) {
-          console.error('Error creating profile:', error);
+          console.error('Error saving profile:', error);
       }
     };
 
@@ -82,7 +118,9 @@ const Register = () => {
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold text-pink-800">Register New Profile</h1>
+        <h1 className="text-3xl font-semibold text-pink-800">
+          {isEditMode ? 'Edit Profile' : 'Register New Profile'}
+        </h1>
         <button
              className="text-2xl text-pink-600 hover:text-gray-600"
               onClick={() => router.back()}
@@ -165,7 +203,7 @@ const Register = () => {
              <div className="flex justify-center pt-6 mt-10">
                  <Button
                     type="submit"
-                    title="Register my profile!"
+                    title={isEditMode ? "Update Profile!" : "Register my profile!"}
                      fontWeight="font-semibold"
                      colourClass="pinkStrong"
                      isDisabled={!isFormValid()}
