@@ -17,6 +17,7 @@ const useUploadStore = create(
               name: fileData.name,
               trip: fileData.trip,
               tripId: fileData.tripId,
+              profileId: fileData.profileId,
               data: reader.result 
             }]
           }));
@@ -26,10 +27,19 @@ const useUploadStore = create(
       },
 
       getFileById: (id) => get().uploadedFiles.find(file => file.id === id),
+      //linking files with trips and profile 
+      getFilesByProfileId: (profileId)=> get().uploadedFiles.filter(file => file.profileId === profileId),
+      getFilesByTripId: (tripId) => get().uploadedFiles.filter(file => file.tripId === tripId),
 
       deleteFile: (id) => {
         set((state) => ({
           uploadedFiles: state.uploadedFiles.filter(file => file.id !== id)
+        }));
+      },
+      
+      deleteFilesByProfileId: (profileId) =>{
+        set((state)=>({
+          uploadedFiles: state.uploadedFiles.filter(file => file.profileId != profileId)
         }));
       }
     }),

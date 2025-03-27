@@ -13,11 +13,13 @@ const Profile = () => {
     const router = useRouter();
     const profiles = useProfileStore(state => state.profiles);
     const deleteProfile = useProfileStore(state => state.deleteProfile); //for testing purposes
+    const deleteTripsByProfileId = useTripsStore(state=>state.deleteTripsByProfileId);
     const lastProfile = profiles.length > 0 ? profiles[profiles.length - 1] : null;
 
     const handleDeleteProfile=()=>{
       if (lastProfile){
         deleteProfile(lastProfile.id);
+        deleteTripsByProfileId(lastProfile.id);
         router.push('/trips/profile');
       }
     };

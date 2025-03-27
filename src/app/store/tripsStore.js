@@ -14,11 +14,18 @@ const useTripsStore = create(
       },
       getTripById: (id) => get().trips.find(trip => trip.id === id),
 
+      getTripByProfileId: (profileId) => get().trips.filter(trip=>trip.profileId ===profileId),
+      
       deleteTrip: (id) => {
         set((state) => ({
           trips: state.trips.filter(trip => trip.id !== id)
         }));
       },
+      deleteTripsByProfileId: (profileId)=>{
+        set((state)=> ({
+          trips:state.trips.filter(trip=>trip.profileId !==profileId)
+        }));
+      }
     }),
     {
       name: 'trips-storage',
