@@ -13,6 +13,19 @@ const useProfileStore = create(
         return id;
       },
       getProfileById: (id) => get().profiles.find(profile => profile.id === id),
+      updateProfile: (id, updatedProfile)=> {
+        set((state)=>({
+          profiles: state.profiles.map(profile =>
+            profile.id === id ? {...updatedProfile, id} : profile
+          )
+        }));
+      },
+      //for testing purposes
+      deleteProfile: (id) => {
+        set((state)=>({
+          profiles:state.profiles.filter(profile=>profile.id !==id)
+        }));
+      }
     }),
     {
       name: 'profile-storage',
