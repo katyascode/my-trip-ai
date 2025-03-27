@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import useTripsStore from '@/app/store/tripsStore';
 import useProfileStore from '@/app/store/profileStore';
 import InputField from "@/app/components/InputField";
@@ -15,12 +15,17 @@ const Register = () => {
     const getProfileById = useProfileStore(state => state.getProfileById);
     const profileId = getProfileById(params.id);
     const addProfile = useProfileStore(state => state.addProfile);
-    const interestOptions=['Hiking','Beaches','Shopping','Exploring Food','Museums','Sightseeing','Relaxation/Spas','Adventure Activities']
-      const [profileData, setProfileData] = useState({
-        username: '',
-        budget: '',
-        interests: ''
+    const defaultInterests=['Hiking','Beaches','Shopping','Exploring Food','Museums','Sightseeing','Relaxation/Spas','Adventure Activities']
+    const [interestOptions, setInterestOptions] = useState(defaultInterests);
+    const [profileData, setProfileData] = useState({
+      username: '',
+      budget: '',
+      interests: []
     });
+    //to dynamically allow users to add additional interests
+    const [newInterest, setNewInterest] = useState('');
+    const [showAddedInterest, setShowAddedInterest] = useState(false);
+
     //if a pre-existing username already exists, just autofill it in form 
     useEffect(()=>{
       const username = searchParams.get('username');
@@ -28,22 +33,47 @@ const Register = () => {
         setProfileData(prev =>({...prev,username}));
       }
     }, [searchParams]);
+   
+    //logic for interacting with interest buttons
+    const toggleInterest = (interest) =>{
+      setProfileData(prev => {
+        const currentInterests = prev.interests;
+        const newInterests = currentInterests.includes(interest)
+          ? currentInterests.filter(i => i !== interest)
+          :[...currentInterests, interest];
+        return {...prev, interests:newInterests};
+      });
+    };
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('Submitting profile data:', profileData);
+    const handleAddedNewInterest = (e) =>{
+      e.preventDefault();
+      if (newInterest.trim()){
+        const trimmedInterest = newInterest.trim();
+        if (!interestOptions.includes(trimmedInterest)){
+          setInterestOptions(prev => [...prev, trimmedInterest]);
+        }
+        setNewInterest('');
+        setShowAddedInterest(false);
+      }
+    };
 
-    try {
-      const newProfileId = addProfile(profileData);
-      console.log('Created profile with ID:', profileId);
-      await router.push(`/trips/profile`);
-    } catch (error) {
-      console.error('Error creating profile:', error);
-    }
-  };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      console.log('Submitting profile data:', profileData);
+      try {
+          const newProfileId = addProfile({
+              ...profileData,
+              interests: profileData.interests.join(', ')
+          });
+          console.log('Created profile with ID:', profileId);
+          await router.push(`/trips/profile`);
+      } catch (error) {
+          console.error('Error creating profile:', error);
+      }
+    };
 
   const isFormValid = () => {
-    const valid = profileData.username && profileData.budget && profileData.interests;
+    const valid = profileData.username && profileData.budget && profileData.interests.length >0;
     console.log('Form valid:', valid, profileData);
     return valid;
   };
@@ -87,18 +117,51 @@ const handleSubmit = async (e) => {
                         <option value="$$$">$$$ - Luxury</option>
                       </select>
              </div>
-             <div className="space-y-2">
-                 <InputField
-                    type="text"
-                    value={profileData.interests}
-                    label="What are your traveling interests?"
-                    onChange={(e) => {
-                        console.log('interests change:', e.target.value);
-                        setProfileData({...profileData, interests: e.target.value});
-                    }}
-                    placeholder="Enter your interests comma separated"
-                 />
-             </div>
+             <div className="space-y-2 mt-4">
+                <div className='flex justify-between items-center'>
+                <label className='block font-medium'>What are your traveling interests?</label>
+                  <button
+                    type="button"
+                    onClick={()=> setShowAddedInterest(!showAddedInterest)}
+                    className='text-sm text-pink-600 hover:text-pink-700 font-medium'
+                  >
+                    + Add More
+                  </button>
+                </div>
+                {showAddedInterest && (
+                  <div className='flex gap-2 mb-2'>
+                    <input
+                      type='text'
+                      value={newInterest}
+                      onChange={(e) => setNewInterest(e.target.value)}
+                      placeholder='Enter another interest'
+                      className='flex-1 border px-3 py-2 rounded-mb text-sm'
+                    />
+                    <button
+                      type='button'
+                      onClick={handleAddedNewInterest}
+                      className='px-3 py-2 bg-pink-600 text-white rounded-md text-sm hover:bg-pink-700'
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-2 mt-2'>
+                  {interestOptions.map((interest)=>(
+                    <button 
+                      key={interest}
+                      type='button'
+                      onClick={()=>toggleInterest(interest)}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                        ${profileData.interests.includes(interest)
+                          ? 'bg-pink-600 text-white hover:bg-pink-700'
+                          : 'bg-pink-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                      {interest}
+                    </button>
+                  ))}
+                </div>
+                </div>
              <div className="flex justify-center pt-6 mt-10">
                  <Button
                     type="submit"
