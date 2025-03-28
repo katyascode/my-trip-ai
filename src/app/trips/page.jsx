@@ -13,7 +13,7 @@ const Trips = () => {
   const router = useRouter();
   const profiles = useProfileStore(state=>state.profiles);
   const latestProfile = profiles[profiles.length - 1];
-  const getTripByProfileId = useTripsStore(state => state.getTripByProfileId); 
+  const getTripByProfileId = useTripsStore(state => state.getTripByProfileId);
   const profileTrips = latestProfile ? getTripByProfileId(latestProfile.id) : [];
 
   return (
@@ -24,7 +24,8 @@ const Trips = () => {
           <Button
             title="Create New Trip"
             icon={<FaPlaneUp/>}
-            colourClass="green"
+            iconSide="right"
+            colourClass="greenSolid"
             link="/trips/create"
           />
       )}

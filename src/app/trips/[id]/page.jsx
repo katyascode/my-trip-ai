@@ -20,7 +20,7 @@ const TripDetails = () => {
   const spent = expenses
     .filter(expense => expense.tripId === params.id)
     .reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
-  
+
   const [aiResponse, setAiResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,11 +35,11 @@ const TripDetails = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState('');
   const [showUploadPopUp, setShowUploadPopUp] = useState(false);
-  
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file || !trip) return;
-  
+
     setSelectedFile(file);
     setPreviewURL(URL.createObjectURL(file));
     setShowUploadPopUp(true);
@@ -136,28 +136,26 @@ const TripDetails = () => {
               <span>•</span>
               <div>${spent.toFixed(2)} / ${trip.budget} spent</div>
             </div>
-            <div className="flex flex-row justify-between items-center text-sm mt-2">
-              <div className="flex gap-2">
-                <button
-                  className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5"
-                  onClick={() => fileInputRef.current.click()}
-                >
-                  + Add documents to trip
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
+            <div className="flex flex-1 gap-2 items-center text-sm mt-2">
+              <button
+                className="bg-pink-200 text-pink-600 rounded-lg px-2 py-1.5"
+                onClick={() => fileInputRef.current.click()}
+              >
+                ➕ Add docs
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+              />
 
-                <button
-                  className="bg-green-200 text-green-400 rounded-lg px-2 py-1.5"
-                  onClick={() => router.push(`/trips/${params.id}/budget`)}
-                >
-                  $ View budget
-                </button>
-              </div>
+              <button
+                className="bg-green-200 text-green-400 rounded-lg px-2 py-1.5"
+                onClick={() => router.push(`/trips/${params.id}/budget`)}
+              >
+                💰 View budget
+              </button>
 
               <button
                 onClick={() => setShowViewerPopUp(true)}
@@ -168,27 +166,27 @@ const TripDetails = () => {
               </button>
             </div>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex flex-col gap-2 w-full mt-4">
               <button
-                className="bg-pink-500 text-white font-bold rounded-lg px-4 py-3 w-full max-w-md text-lg shadow-md hover:bg-pink-600 transition"
+                className="bg-pink-800 text-white font-bold rounded-lg px-4 py-3 w-full max-w-md text-lg shadow-md hover:bg-pink-600 transition"
                 onClick={() => router.push(`/trips/${params.id}/itinerary`)}
               >
-                ✨ Generate Itinerary
+                View Itinerary
               </button>
             </div>
-
-            <div className="relative">
-              <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl" />
-              <div className="px-6 py-4">
-                {isLoading && <div className="text-gray-600">Loading suggestions...</div>}
-                {error && <div className="text-red-600">Error: {error}</div>}
-                {aiResponse && (
-                  <div className="bg-white rounded-lg p-4 shadow-sm border border-pink-200">
-                    <h2 className="text-xl font-semibold text-pink-800 mb-2">Travel Tips</h2>
-                    <p className="text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
-                  </div>
-                )}
-              </div>
+          </div>
+          <div className="relative bottom-0 p-8">
+            <div className="absolute top-0 left-0 right-0 h-2 border-t-1 border-pink-600 rounded-t-xl"/>
+            <div className="">
+              {isLoading &&
+                <div className="text-gray-600 text-xl text-pink-600 h-80 flex flex-col text-center justify-center">Loading suggestions... ✨</div>}
+              {error && <div className="text-red-600">Error: {error}</div>}
+              {aiResponse && (
+                <div className="rounded-lg">
+                  <h2 className="text-xl font-semibold text-pink-800 mb-2">Your AI Destination Summary</h2>
+                  <p className="text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
+                </div>
+              )}
             </div>
           </div>
         </>

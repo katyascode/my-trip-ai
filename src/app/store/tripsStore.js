@@ -7,8 +7,8 @@ const useTripsStore = create(
       trips: [],
       addTrip: (trip) => {
         const id = Math.random().toString(36).substr(2, 9);
-        set((state) => ({ 
-          trips: [...state.trips, { ...trip, id }] 
+        set((state) => ({
+          trips: [...state.trips, { ...trip, id, itinerary: null, preferences: null }]
         }));
         return id;
       },
@@ -23,7 +23,23 @@ const useTripsStore = create(
         set((state)=> ({
           trips:state.trips.filter(trip=>trip.profileId !==profileId)
         }));
-      }
+      },
+
+      updateTripItinerary: (id, itinerary) => {
+        set((state) => ({
+          trips: state.trips.map(trip =>
+            trip.id === id ? { ...trip, itinerary } : trip
+          )
+        }));
+      },
+
+      updateTripPreferences: (id, preferences) => {
+        set((state) => ({
+          trips: state.trips.map(trip =>
+            trip.id === id ? { ...trip, preferences } : trip
+          )
+        }));
+      },
     }),
     {
       name: 'trips-storage',

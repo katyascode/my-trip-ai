@@ -4,9 +4,8 @@ import React from 'react';
 
 const InputField = ({ type, value, onChange, label, placeholder }) => {
   if (type === 'checkbox') {
-    // Todo - Checkmark that matches theme
     return (
-      <div className="flex flex-row items-center space-x-2">
+      <div className="flex flex-row items-center justify-center space-x-2">
         <input
           type="checkbox"
           checked={value}
