@@ -31,23 +31,42 @@ const CreateTrip = () => {
 
   const fileInputRef = useRef();
   const [pendingUploads, setPendingUploads] = useState([]);
+  const [fileError, setFileError] = useState("");
   const addFileToStore = useUploadStore(state => state.addFile);
 
-  const handleUpload = (file) => {
-    const uploadWithTrip = {
-      ...file,
-      trip: tripData.destination || "New Trip",
-      tripId: null, // will be assigned after trip is created
-    };
+  //!func was not being used 
+  // const handleUpload = (file) => {
+  //   const uploadWithTrip = {
+  //     ...file,
+  //     trip: tripData.destination || "New Trip",
+  //     tripId: null, // will be assigned after trip is created
+  //   };
   
-    setPendingUploads(prev => [...prev, uploadWithTrip]);
-    addFileToStore(uploadWithTrip);
+  //   setPendingUploads(prev => [...prev, uploadWithTrip]);
+  //   addFileToStore(uploadWithTrip);
   
-    setSelectedFile(null);
-    setPreviewURL('');
-    setShowUploadPopUp(false);
-  };  
+  //   setSelectedFile(null);
+  //   setPreviewURL('');
+  //   setShowUploadPopUp(false);
+  // };  
 
+  const handleFileChange=(e)=>{
+    const file = e.target.files[0];
+    setFileError("");
+    if (file) {
+      if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        const fileData = {
+          name: file.name,
+          url: URL.createObjectURL(file),
+          trip: tripData.destination || "New Trip",
+          tripId: null,
+        };
+        setPendingUploads(prev => [...prev, fileData]);
+      } else {
+        setFileError("Please select a DOCX file");
+      }
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -225,19 +244,13 @@ const CreateTrip = () => {
             type="file"
             ref={fileInputRef}
             className="hidden"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                const fileData = {
-                  name: file.name,
-                  url: URL.createObjectURL(file),
-                  trip: tripData.destination || "New Trip",
-                  tripId: null,
-                };
-                setPendingUploads(prev => [...prev, fileData]);
-              }
-            }}            
+            onChange={handleFileChange}            
           />
+          {fileError && (
+            <div className="mt-2 text-sm text-red-600">
+              {fileError}
+            </div>
+          )}
           {pendingUploads.length > 0 && (
             <div className="mt-4">
               <ul className="space-y-2">

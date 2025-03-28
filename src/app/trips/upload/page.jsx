@@ -10,6 +10,7 @@ const UploadPage = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewURL, setPreviewURL] = useState("");
     const [selectedTrip, setSelectedTrip] = useState("");
+    const [fileError, setFileError] = useState("");
 
     const addFile = useUploadStore(state => state.addFile);
     const deleteFile = useUploadStore(state => state.deleteFile);
@@ -18,10 +19,18 @@ const UploadPage = () => {
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         console.log("File selected:", file);
+        setFileError("");
 
         if (file) {
-            setSelectedFile(file);
-            setPreviewURL(URL.createObjectURL(file));
+            if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"){
+                setSelectedFile(file);
+                setPreviewURL(URL.createObjectURL(file));
+            }
+            else{
+                setSelectedFile(file);
+                setPreviewURL("");
+                setFileError("Please select a DOCX file");
+            }
         }
     };
 
@@ -109,11 +118,29 @@ const UploadPage = () => {
                         </select>
                     </div>
 
-                    <input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="bg-green-200 text-green-400 rounded-lg px-2 py-1.5"
-                    />
+                    <div className="mt-4">
+                        <button
+                            type="button"
+                            onClick={() => document.querySelector('input[type="file"]').click()}
+                            className="w-full bg-green-100 text-green-700 rounded-md px-4 py-2 border border-green-200 hover:bg-green-200 transition-colors"
+                        >
+                            Choose File
+                        </button>
+                        <input
+                            type="file"
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+                        {fileError ? (
+                            <div className="mt-2 text-sm text-red-600">
+                                {fileError}
+                            </div>
+                        ) : selectedFile && (
+                            <div className="mt-2 text-sm text-gray-600">
+                                Selected: {selectedFile.name}
+                            </div>
+                        )}
+                    </div>
 
                     {previewURL && (
                         <div className="mt-4">
@@ -125,38 +152,49 @@ const UploadPage = () => {
                     <button
                         type="submit"
                         disabled={!selectedTrip || !selectedFile}
-                        className={`bg-pink-600 text-white font-bold px-4 py-2 rounded-md ${
-                            !selectedTrip || !selectedFile ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-700'
+                        className={`w-half mt-4 bg-pink-100 text-pink-700 font-bold px-4 py-2 rounded-md ${
+                            !selectedTrip || !selectedFile ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-200'
                         }`}
                     >
                         Upload File
                     </button>
                 </form>
 
-                <h3 className="text-xl font-bold mt-6">Uploaded Files:</h3>
-                <ul>
-                    {uploadedFiles && uploadedFiles.map((file) => (
-                        <li key={file.id} className="flex justify-between items-center mt-2">
-                            <a
-                                href={file.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 underline hover:text-blue-800"
-                            >
-                                {file.name} ({file.trip})
-                            </a>
-                            <button
-                                onClick={() => {
-                                    console.log("Deleting file:", file.id);
-                                    deleteFile(file.id);
-                                }}
-                                className="text-pink-600 hover:text-red-600 ml-2"
-                            >
-                                ✕ Remove File
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                {uploadedFiles && uploadedFiles.length > 0 && (
+                    <div className="mt-6">
+                        <h3 className="text-xl font-bold mb-4">Uploaded Files:</h3>
+                        <ul className="space-y-2">
+                            {uploadedFiles.map((file) => (
+                                <li key={file.id} className="flex items-center bg-gray-50 rounded-md px-3 py-2">
+                                    <span className="text-gray-600 flex-shrink-0 mr-2">📄</span>
+                                    <div className="flex-1 min-w-0 flex items-baseline">
+                                        <a
+                                            href={file.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 truncate mr-1"
+                                            title={file.name}
+                                        >
+                                            {file.name}
+                                        </a>
+                                        <span className="text-gray-400 text-sm flex-shrink-0 bg-gray-200 px-1.5 py-0.5 rounded">
+                                            {file.trip}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            console.log("Deleting file:", file.id);
+                                            deleteFile(file.id);
+                                        }}
+                                        className="text-red-500 hover:text-red-700 flex-shrink-0 ml-2 px-1"
+                                    >
+                                        X
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
     );
