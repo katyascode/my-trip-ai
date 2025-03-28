@@ -122,6 +122,11 @@ const UploadPage = () => {
                             onChange={handleFileChange}
                             className="hidden"
                         />
+                        {selectedFile && (
+                            <div className="mt-2 text-sm text-gray-600">
+                                Selected: {selectedFile.name}
+                            </div>
+                        )}
                     </div>
 
                     {previewURL && (
