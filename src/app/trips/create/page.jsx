@@ -235,7 +235,6 @@ const CreateTrip = () => {
                   tripId: null,
                 };
                 setPendingUploads(prev => [...prev, fileData]);
-                addFileToStore(fileData);
               }
             }}            
           />
