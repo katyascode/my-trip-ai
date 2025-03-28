@@ -29,7 +29,7 @@ const UploadPage = () => {
             else{
                 setSelectedFile(file);
                 setPreviewURL("");
-                setFileError("File must be type DOCX");
+                setFileError("Please select a DOCX file");
             }
         }
     };
