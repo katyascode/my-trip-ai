@@ -7,18 +7,22 @@ import Button from "@/app/components/Button";
 import {FaUpload} from "react-icons/fa6";
 import useTripsStore from '@/app/store/tripsStore';
 import useUploadStore from '@/app/store/uploadStore';
+import useProfileStore from '@/app/store/profileStore';
 
 // (Checklist) Todo - Form Validation -> End date cannot be before start date
 // (Checklist) Todo - Upload documents mockup -> Allow user to upload documents
 const CreateTrip = () => {
   const router = useRouter();
   const addTrip = useTripsStore(state => state.addTrip);
+  const profiles = useProfileStore(state => state.profiles);
+  const latestProfile = profiles[profiles.length-1];
   const [tripData, setTripData] = useState({
     destination: '',
     departureDate: '',
     returnDate: '',
     isOneWay: false,
     budget: '',
+    profileId: latestProfile?.id || null //linking trips to profiles
   });
 
   const [dateError, setDateError] = useState('');
