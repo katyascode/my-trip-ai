@@ -10,6 +10,7 @@ const UploadPage = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewURL, setPreviewURL] = useState("");
     const [selectedTrip, setSelectedTrip] = useState("");
+    const [fileError, setFileError] = useState("");
 
     const addFile = useUploadStore(state => state.addFile);
     const deleteFile = useUploadStore(state => state.deleteFile);
@@ -18,10 +19,18 @@ const UploadPage = () => {
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         console.log("File selected:", file);
+        setFileError("");
 
         if (file) {
-            setSelectedFile(file);
-            setPreviewURL(URL.createObjectURL(file));
+            if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"){
+                setSelectedFile(file);
+                setPreviewURL(URL.createObjectURL(file));
+            }
+            else{
+                setSelectedFile(file);
+                setPreviewURL("");
+                setFileError("File must be type DOCX");
+            }
         }
     };
 
@@ -122,7 +131,11 @@ const UploadPage = () => {
                             onChange={handleFileChange}
                             className="hidden"
                         />
-                        {selectedFile && (
+                        {fileError ? (
+                            <div className="mt-2 text-sm text-red-600">
+                                {fileError}
+                            </div>
+                        ) : selectedFile && (
                             <div className="mt-2 text-sm text-gray-600">
                                 Selected: {selectedFile.name}
                             </div>
