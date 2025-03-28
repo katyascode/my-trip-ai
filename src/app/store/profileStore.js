@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import useTripsStore from './tripsStore';
+import useUploadStore from './uploadStore';
 
 const useProfileStore = create(
   persist(
@@ -22,6 +24,13 @@ const useProfileStore = create(
       },
       //for testing purposes
       deleteProfile: (id) => {
+        const trips = useTripsStore.getState().getTripByProfileId(id);
+
+        // Delete all documents associated with these trips
+        trips.forEach(trip => {
+          useUploadStore.getState().deleteFilesByTripId(trip.id);
+        });
+
         set((state)=>({
           profiles:state.profiles.filter(profile=>profile.id !==id)
         }));

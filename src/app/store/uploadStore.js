@@ -20,6 +20,11 @@ const useUploadStore = create(
         set((state) => ({
           uploadedFiles: state.uploadedFiles.filter(file => file.id !== id)
         }));
+      },
+      deleteFilesByTripId: (tripId) => {
+        set((state) => ({
+          uploadedFiles: state.uploadedFiles.filter(file => file.tripId !== tripId)
+        }));
       }
     }),
     {
