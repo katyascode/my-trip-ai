@@ -48,16 +48,16 @@ const Profile = () => {
         {lastProfile && (
             <>
             <ProfileInfo key={lastProfile.id} profile={lastProfile} />
-            <div className="flex justify-center mt-40">
+            <div className="flex justify-center gap-4 mt-40">
+                <Button
+                  title="Delete profile"
+                  colourClass="default"
+                  onClick={handleDeleteProfile}
+                />
                 <Button
                    title="Edit Profile"
                    colourClass="green"
                    onClick={() => router.push(`/trips/profile/register?username=${lastProfile.username}`)}
-                />
-                <Button
-                  title="Delete profile"
-                  colourClass="red"
-                  onClick={handleDeleteProfile}
                 />
             </div>
             </>

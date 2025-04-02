@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import useUploadStore from "@/app/store/uploadStore";
 import useTripsStore from "@/app/store/tripsStore";
 import mammoth from "mammoth";
+import Button from "@/app/components/Button";
 
 const UploadPage = () => {
     const trips = useTripsStore(state => state.trips);
@@ -107,7 +108,7 @@ const UploadPage = () => {
                         <select
                             value={selectedTrip}
                             onChange={(e) => setSelectedTrip(e.target.value)}
-                            className="w-full border px-3 py-2 rounded-md"
+                            className="w-full border px-4 py-3 rounded-lg border-pink-600 shadow-md focus:outline-none focus:ring-1 focus:ring-pink-600"
                         >
                             <option value="">Select Trip</option>
                             {trips.map((trip) => (
@@ -118,18 +119,17 @@ const UploadPage = () => {
                         </select>
                     </div>
 
-                    <div className="mt-4">
-                        <button
-                            type="button"
+                    <div className="mt-4 flex justify-center">
+                        <Button
                             onClick={() => document.querySelector('input[type="file"]').click()}
-                            className="w-full bg-green-100 text-green-700 rounded-md px-4 py-2 border border-green-200 hover:bg-green-200 transition-colors"
-                        >
-                            Choose File
-                        </button>
+                            colourClass="green"
+                            title="Choose File"
+                        />
                         <input
                             type="file"
                             onChange={handleFileChange}
                             className="hidden"
+                            accept=".docx"
                         />
                         {fileError ? (
                             <div className="mt-2 text-sm text-red-600">
@@ -149,15 +149,14 @@ const UploadPage = () => {
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={!selectedTrip || !selectedFile}
-                        className={`w-half mt-4 bg-pink-100 text-pink-700 font-bold px-4 py-2 rounded-md ${
-                            !selectedTrip || !selectedFile ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-200'
-                        }`}
-                    >
-                        Upload File
-                    </button>
+                    <div className="flex justify-center">
+                        <Button
+                            type="submit"
+                            disabled={!selectedTrip || !selectedFile}
+                            colourClass={!selectedTrip || !selectedFile ? "default" : "pinkSolid"}
+                            title="Upload File"
+                        />
+                    </div>
                 </form>
 
                 {uploadedFiles && uploadedFiles.length > 0 && (
