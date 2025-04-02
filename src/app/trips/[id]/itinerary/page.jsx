@@ -8,8 +8,27 @@ import dayjs from 'dayjs';
 import useProfileStore from '@/app/store/profileStore';
 import useUploadStore from '@/app/store/uploadStore';
 import ReactMarkdown from 'react-markdown';
-import { MdEdit, MdCheck, MdClose } from 'react-icons/md';
+import { MdEdit, MdCheck, MdClose, MdLoop } from 'react-icons/md';
 import InputField from "@/app/components/InputField";
+
+// Custom components for markdown rendering
+const MarkdownComponents = {
+  h2: ({ children }) => <h2 className="text-xl font-bold text-pink-800 mt-8 mb-4">{children}</h2>,
+  h3: ({ children }) => <h3 className="text-lg font-semibold text-green-400 mt-6 mb-3">{children}</h3>,
+  ul: ({ children }) => <ul className="space-y-2 mb-4">{children}</ul>,
+  li: ({ children }) => (
+    <li className="flex items-start">
+      <span className="text-pink-600 mr-2">•</span>
+      <span>{children}</span>
+    </li>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-4 border-pink-200 pl-4 my-4 text-gray-600 italic">
+      {children}
+    </blockquote>
+  ),
+  em: ({ children }) => <em className="text-gray-600 italic">{children}</em>,
+};
 
 const ItineraryPage = () => {
   const params = useParams();
@@ -53,13 +72,27 @@ const ItineraryPage = () => {
     setError(null);
 
     try {
+      // Calculate trip duration
+      const startDate = dayjs(trip.departureDate);
+      const endDate = dayjs(trip.returnDate);
+      const tripDuration = endDate.diff(startDate, 'day') + 1;
+
+      // Combine profile interests with trip-specific preferences
+      const combinedPreferences = [
+        latestProfile?.interests,
+        preferences
+      ].filter(Boolean).join(', ') || 'any';
+
       const requestBody = {
         type: 'itinerary',
-        userMessage: `Generate an itinerary for ${trip.destination}`,
+        userMessage: `Generate an itinerary for ${trip.destination} for exactly ${tripDuration} days, from ${startDate.format('MMMM D')} to ${endDate.format('MMMM D, YYYY')}`,
         destinationCity: trip.destination,
         files: filesText,
-        preferences: preferences || latestProfile?.interests || "any",
-        budget: latestProfile?.budget || "any"
+        preferences: combinedPreferences,
+        budget: latestProfile?.budget || "any",
+        duration: tripDuration,
+        startDate: startDate.format('YYYY-MM-DD'),
+        endDate: endDate.format('YYYY-MM-DD')
       };
       console.log('Sending request:', requestBody);
 
@@ -189,23 +222,24 @@ const ItineraryPage = () => {
           </div>
         )}
         {isRegenerating && (
-          <div className="bg-white rounded-lg p-4">
+          <div className="px-8 py-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-pink-800">Trip Suggestions</h2>
-              <div className="text-gray-600">Itinerary is being created...</div>
+              <h2 className="text-2xl font-semibold text-pink-800">Trip Suggestions</h2>
+              <div className="text-gray-600">Regenerating...</div>
             </div>
           </div>
         )}
         {error && <div className="text-red-600">Error: {error}</div>}
         {aiResponse && !isRegenerating && (
-          <div className="bg-white rounded-lg px-8 py-4 shadow-sm border border-pink-200">
+          <div className="bg-white px-8 py-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-pink-800">Trip Suggestions</h2>
-              <Button
-                title="Regenerate"
-                colourClass="green"
+              <h2 className="text-2xl font-semibold text-pink-800">Trip Suggestions</h2>
+              <button
+                className="bg-pink-400 rounded-full p-1"
                 onClick={fetchAiSuggestions}
-              />
+              >
+                <MdLoop />
+              </button>
             </div>
             {(!latestProfile?.interests || !latestProfile?.budget) && (
               <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
@@ -214,8 +248,8 @@ const ItineraryPage = () => {
                 </p>
               </div>
             )}
-            <div className="prose prose-pink max-w-none">
-              <ReactMarkdown >{aiResponse}</ReactMarkdown>
+            <div className="prose max-w-none">
+              <ReactMarkdown components={MarkdownComponents}>{aiResponse}</ReactMarkdown>
             </div>
           </div>
         )}

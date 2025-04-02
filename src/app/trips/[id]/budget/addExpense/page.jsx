@@ -158,7 +158,7 @@ const CreateExpense = () => {
             type="submit"
             title="Create my expense!"
             fontWeight="font-semibold"
-            colourClass="pinkStrong"
+            colourClass="pinkSolid"
             isDisabled={!isFormValid()}
           />
         </div>

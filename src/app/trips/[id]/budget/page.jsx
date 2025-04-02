@@ -74,14 +74,8 @@ const BudgetPage = () => {
   }
 
   return (
-    <div className="max-w-[800px] mx-auto px-6 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Budget for {trip.destination}</h1>
-          <p className="text-gray-600">
-            {dayjs(trip.departureDate).format('MMM D')} - {dayjs(trip.returnDate).format('MMM D, YYYY')}
-          </p>
-        </div>
+    <div className="max-w-[900px] mx-auto px-8 py-12">
+      <div className="mb-8">
         <Button
           title="Back to Trip"
           colourClass="green"
@@ -89,25 +83,32 @@ const BudgetPage = () => {
         />
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-md border border-pink-600">
-        <div className="flex flex-col items-center mb-8">
-          <div className="text-center mb-6">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-pink-800 mb-2">Budget for {trip.destination}</h1>
+        <p className="text-gray-600 text-lg">
+          {dayjs(trip.departureDate).format('MMM D')} - {dayjs(trip.returnDate).format('MMM D, YYYY')}
+        </p>
+      </div>
+
+      <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-pink-600">
+        <div className="flex flex-col items-center mb-10">
+          <div className="text-center mb-8">
             {/* Total Budget & Budget Left side-by-side */}
-            <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-800">Total Budget</h2>
-                <p className="text-3xl font-bold text-pink-600">${trip.budget}</p>
+            <div className="flex flex-col md:flex-row justify-center items-center gap-12 mb-8">
+              <div className="bg-pink-50 p-6 rounded-xl">
+                <h2 className="text-xl font-semibold text-pink-800 mb-2">Total Budget</h2>
+                <p className="text-4xl font-bold text-pink-600">${trip.budget}</p>
               </div>
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-800">Budget Left</h2>
-                <p className="text-3xl font-bold text-green-400">${budgetLeft.toFixed(2)}</p>
+              <div className="bg-green-50 p-6 rounded-xl">
+                <h2 className="text-xl font-semibold text-green-800 mb-2">Budget Left</h2>
+                <p className="text-4xl font-bold text-green-400">${budgetLeft.toFixed(2)}</p>
               </div>
             </div>
 
             {/* Total Spent below */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-800">Total Spent</h2>
-              <p className="text-3xl font-bold text-pink-600">${spent.toFixed(2)}</p>
+            <div className="bg-pink-50 p-6 rounded-xl inline-block">
+              <h2 className="text-xl font-semibold text-pink-800 mb-2">Total Spent</h2>
+              <p className="text-4xl font-bold text-pink-600">${spent.toFixed(2)}</p>
             </div>
           </div>
 
@@ -119,20 +120,20 @@ const BudgetPage = () => {
               </div>
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">Add an expenses to display</p>
+            <p className="text-gray-500 text-center py-8 text-lg">Add an expense to display</p>
           )}
         </div>
       </div>
 
-      <div className="mt-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Recent Expenses</h1>
+      <div className="mt-10 flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-pink-800">Recent Expenses</h1>
         <Button
           title="Add Expense"
           colourClass="green"
           onClick={() => router.push(`/trips/${params.id}/budget/addExpense`)}
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {expenses
           .filter(expense => expense.tripId === params.id)
           .map(expense => (
@@ -141,7 +142,7 @@ const BudgetPage = () => {
         }
 
         {expenses.filter(expense => expense.tripId === params.id).length === 0 && (
-          <p className="text-gray-500 col-span-2 text-center py-8">
+          <p className="text-gray-500 col-span-2 text-center py-12 text-lg">
             No recent expenses
           </p>
         )}

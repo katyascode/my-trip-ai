@@ -33,13 +33,15 @@ const Trips = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {!latestProfile ? (
-          <div className='col-span-2 text-center py-8'>
+          <div className='text-center py-8'>
             <p className='text-gray-500 mb-4'>Create a profile first to manage trips.</p>
-            <Button
-              title="Create Profile"
-              colourClass="green"
-              onClick={()=>router.push('/trips/profile/register')}
-          />
+            <div className='flex justify-center'>
+              <Button
+                title="Create Profile"
+                colourClass="green"
+                onClick={()=>router.push('/trips/profile/register')}
+              />
+            </div>
           </div>
         ) : profileTrips.length === 0 ? (
           <p className="text-gray-500 col-span-2 text-center py-8">

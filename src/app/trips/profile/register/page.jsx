@@ -118,7 +118,7 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="max-w-[800px] mx-auto px-6 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold text-pink-800">
           {isEditMode ? 'Edit Profile' : 'Register New Profile'}
         </h1>
@@ -130,7 +130,7 @@ const handleSubmit = async (e) => {
         </button>
       </div>
         <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="max-w-[600px] mx-auto p-5 bg-white rounded-xl">
+            <div className="max-w-[600px] mx-auto rounded-xl">
             <div className="space-y-2 mt-4">
                 <InputField
                     type="text"
@@ -144,11 +144,11 @@ const handleSubmit = async (e) => {
                 />
              </div>
              <div className="space-y-2 mt-4">
-                 <label className="block font-medium">What is your general budget?</label>
+                 <label className="block font-medium font-semibold">What is your general budget?</label>
                       <select
                         value={profileData.budget}
                         onChange={(e) => setProfileData({ ...profileData, budget: e.target.value })}
-                        className="w-full border px-3 py-2 rounded-md"
+                        className="w-full border px-4 py-3 shadow-md rounded-lg border-pink-600 focus:outline-none focus:border-pink-600 focus:bg-pink-200 transition-all duration-300"
                       >
                         <option value="">Select Budget</option>
                         <option value="$">$ - Budget</option>
@@ -158,7 +158,7 @@ const handleSubmit = async (e) => {
              </div>
              <div className="space-y-2 mt-4">
                 <div className='flex justify-between items-center'>
-                <label className='block font-medium'>What are your traveling interests?</label>
+                <label className='block font-semibold w-3/4'>What are your traveling interests?</label>
                   <button
                     type="button"
                     onClick={()=> setShowAddedInterest(!showAddedInterest)}
@@ -168,18 +168,18 @@ const handleSubmit = async (e) => {
                   </button>
                 </div>
                 {showAddedInterest && (
-                  <div className='flex gap-2 mb-2'>
+                  <div className='flex gap-2 mb-4 items-center'>
                     <input
                       type='text'
                       value={newInterest}
                       onChange={(e) => setNewInterest(e.target.value)}
                       placeholder='Enter another interest'
-                      className='flex-1 border px-3 py-2 rounded-mb text-sm'
+                      className='flex-1 border border-pink-600 px-4 py-2 rounded-lg shadow-md text-sm'
                     />
                     <button
                       type='button'
                       onClick={handleAddedNewInterest}
-                      className='px-3 py-2 bg-pink-600 text-white rounded-md text-sm hover:bg-pink-700'
+                      className='px-3 py-2 bg-pink-600 text-white h-fit rounded-md text-sm hover:bg-pink-700'
                     >
                       Add
                     </button>
@@ -206,7 +206,7 @@ const handleSubmit = async (e) => {
                     type="submit"
                     title={isEditMode ? "Update Profile!" : "Register my profile!"}
                      fontWeight="font-semibold"
-                     colourClass="pinkStrong"
+                     colourClass="pinkSolid"
                      isDisabled={!isFormValid()}
                  />
             </div>

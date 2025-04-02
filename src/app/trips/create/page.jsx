@@ -292,7 +292,7 @@ const CreateTrip = () => {
             type="submit"
             title="Create my trip!"
             fontWeight="font-semibold"
-            colourClass="pinkStrong"
+            colourClass="pinkSolid"
           />
         </div>
       </form>

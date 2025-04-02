@@ -9,7 +9,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const {
-      type, // 'trip', 'document'
+      type,
       userMessage,
       age,
       originAirport,
@@ -17,7 +17,10 @@ export async function POST(req) {
       destinationCity,
       files,
       preferences,
-      budget
+      budget,
+      duration,
+      startDate,
+      endDate
     } = body;
 
     if (!(userMessage && type)) {
@@ -28,10 +31,6 @@ export async function POST(req) {
     }
 
     let systemMessage = "";
-
-    // Types of requests:
-    // (1) Travel Suggestions (overview)
-    // (2) Document-based feedback (e.g. hotel confirmation)
 
     if (type === "trip") {
       systemMessage = `
@@ -51,28 +50,48 @@ export async function POST(req) {
     `.trim()
     }
     if (type === "itinerary") {
-          systemMessage = `
-          You are a helpful, engaging and modern AI travel assistant.
-          Your job is to provide a high-level itinerary of the trip, based on given information from the text extracted from uploaded files and your suggestions for additional activities and modes of transport. Your answer should be organized clearly laid out by time and date and note which travel activities are based off recommendations.
-          Maximum words: Around 100-500 words.
-          Personalize your suggestions for the destination city, using this user preferences, their fileText and their age group keeping in mind their budget:
+      const documentContext = files && files.length > 0 
+        ? `\nIncorporate the following information from uploaded documents into the itinerary where relevant:\n${files.join('\n')}`
+        : '';
 
-          - Age: ${age || "unknown"}
-          - Destination city: ${destinationCity || "unknown"}
-          - Files: ($filesText || "none")
-          - Preferences: ${preferences || "none"}
-          - Budget: ${budget || "none"}
+      systemMessage = `
+      You are a helpful, engaging and modern AI travel assistant.
+      Your task is to create a detailed day-by-day itinerary for a ${duration}-day trip to ${destinationCity}.
+      The trip starts on ${startDate} and ends on ${endDate}.
+      
+      Important rules to follow:
+      1. Create EXACTLY ${duration} days of activities, no more and no less
+      2. Format each day exactly like this:
+         ## Day X (YYYY-MM-DD)
+         ### Morning:
+         - Activity 1 ($cost)
+         - Activity 2 ($cost)
+         ### Afternoon:
+         - Activity 1 ($cost)
+         - Activity 2 ($cost)
+         ### Evening:
+         - Activity 1 ($cost)
+         - Activity 2 ($cost)
+      3. Each activity should include:
+         - Estimated cost in parentheses where applicable
+         - Travel time and transport info in italics
+         - Any special notes or tips in blockquotes
+      4. Consider the user's preferences: ${preferences || "none"}
+      5. Stay within the budget range: ${budget || "flexible"}
+      ${documentContext}
 
-          Be concise but informative and exciting.
-        `.trim()
-        }
+      Do not include any introductory text before the first day heading.
+      Start directly with "## Day 1" and maintain consistent markdown formatting throughout.
+      `.trim();
+    }
 
     const res = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4",
       messages: [
         { role: "system", content: systemMessage },
+        { role: "user", content: userMessage }
       ],
-      temperature: 0.8
+      temperature: 0.7
     });
 
     const reply = res.choices[0].message.content;
