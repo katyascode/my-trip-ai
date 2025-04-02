@@ -1,77 +1,69 @@
-@keyframes bake-pie {
-  from {
-    transform: rotate(0deg) translate3d(0,0,0);
-  }
-}
-
 .pie-chart--wrapper {
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 20px;
+}
+
+.pie-chart-container {
   position: relative;
-  min-height: 300px;
-  margin: 10px 0;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 30px; 
+  margin-top: 30px;
+  animation: rotatePieChart 1s ease-in-out forwards; /* Animation on pie chart */
+
 }
 
 .pie-chart {
   position: relative;
   height: 200px;
   width: 200px;
-  margin: 10px auto 35px;
-  display: inline-block;
-  vertical-align: top;
+  border-radius: 50%;
+  animation: conicRotate 0.5s ease-in-out forwards; /* Add an animation for the conic gradient */
+
 }
 
+@keyframes rotatePieChart {
+  0% {
+    transform: rotate(0deg); /* Start rotation from 0 */
+  }
+  100% {
+    transform: rotate(360deg); /* Rotate the pie chart to 360 degrees */
+  }
+}
+
+@keyframes conicRotate {
+  0% {
+    background: conic-gradient(#eee 0% 100%); /* Initial empty gradient */
+  }
+  100% {
+    background: var(--pie-gradient); /* Final gradient after calculating slices */
+  }
+}
 .pie-chart::before {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 1;
-  width: 100px;
-  height: 100px;
-  background: #EEE;
+  width: 100%;
+  height:100%;
   border-radius: 50%;
-  top: 50px;
-  left: 50px;
+  position: relative;
 }
 
-.pie-chart::after {
-  content: "";
-  display: block;
-  width: 120px;
-  height: 2px;
-  border-radius: 50%;
-  margin: 220px auto;
-}
-
-.slice {
+.pie-hole {
   position: absolute;
-  width: 200px;
-  height: 200px;
-  clip: rect(0px, 200px, 200px, 100px);
-  animation: bake-pie 1s;
-}
-
-.slice span {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 200px;
-  height: 200px;
+  width: 40%;  
+  height: 40%; 
+  background-color: white;
   border-radius: 50%;
-  clip: rect(0px, 200px, 200px, 100px);
+  top: 30%;    /* center the hole properly */
+  left: 30%;   /* center the hole properly */
 }
 
 .pie-chart__legend {
-  position: relative;
-  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  max-width: 400px;
-  padding: 0 1rem;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
 }
 
 .legend-item {
@@ -83,27 +75,17 @@
 }
 
 .legend-color {
+  display: inline-block;
   width: 12px;
   height: 12px;
   border-radius: 50%;
 }
 
 .legend-label {
-  font-weight: 500;
+  flex: 1;
 }
 
 .legend-value {
   color: #666;
 }
 
-.tooltip {
-  position: fixed;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 14px;
-  pointer-events: none;
-  z-index: 1000;
-  display: none;
-} 
