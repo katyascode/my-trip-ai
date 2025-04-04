@@ -1,5 +1,5 @@
 # MyTrip AI
-CMPT 363 Final Project: Team 5️⃣ (Lacey, Celvia, Shana, Katya)\
+CMPT 363 Final Project: Team 5️⃣ (Lacey, Celvia, Shana, Katya)
 
 # To run this project locally:
 
