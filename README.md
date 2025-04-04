@@ -1,8 +1,6 @@
 # MyTrip AI
 CMPT 363 Final Project: Team 5️⃣ (Lacey, Celvia, Shana, Katya)
 
-# To run this project locally:
-
 ## (1) Clone the repository onto your device with: 
 
 ``` git clone https://github.com/katyascode/my-trip-ai```
